@@ -5,6 +5,7 @@ import { authRouter } from './app/auth/route.js';
 import { customerAddressRouter } from './app/customer_address/routes.js';
 import { branchRouter } from './app/branch/routes.js';
 import { restaurantRouter } from './app/restaurant/routes.js';
+import { productRouter } from './app/product/routes.js';
 
 export const routes = Router();
 
@@ -14,3 +15,4 @@ routes.use('/auth', authRouter);
 routes.use('/customer/addresses', customerAddressRouter);
 routes.use('/restaurant', restaurantRouter);
 routes.use('/branches', branchRouter);
+routes.use('/products', productRouter)
