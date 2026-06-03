@@ -95,6 +95,14 @@ export async function updateBranchStatus(
   return row;
 }
 
+export async function getRestaurantIdByBranch(branchId: number): Promise<number | null> {
+  const branch = await db('restaurant_branches')
+    .select('restaurant_id')
+    .where('id', branchId)
+    .first();
+  return branch ? branch.restaurant_id : null;
+}
+
 export async function findNearbyBranches(lat: number, lng: number): Promise<Branch[]> {
   const result = await db.raw(
     `

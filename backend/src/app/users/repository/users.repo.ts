@@ -38,6 +38,16 @@ export async function findUserByPhone(phone: string): Promise<User | null> {
   return row || null;
 }
 
+export async function findUserByEmailOrPhone(email: string, phone: string): Promise<User | null> {
+  const row = await db('users')
+    .select(USER_COLUMNS)
+    .where({ email })
+    .orWhere({ phone })
+    .whereNull('deleted_at')
+    .first();
+  return row || null;
+}
+
 export async function findUserExistsByEmail(email: string): Promise<boolean> {
   const result = await db('users')
     .where({ email })
@@ -65,8 +75,6 @@ export async function createUser(user: Partial<User>, conn: Knex = db): Promise<
       name: user.name,
       password_hash: user.password_hash,
       system_role: user.system_role,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
     })
     .returning(USER_COLUMNS);
   return row;

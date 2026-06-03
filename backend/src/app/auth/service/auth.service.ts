@@ -1,13 +1,20 @@
 import { NotAuthenticated } from '../../../lib/auth/error.js';
 import { db } from '../../../lib/knex/knex.js';
-import { RestaurantService, restaurantService } from '../../restaurant/service/restaurant.service.js';
+import { findBranchIdsByMemberId } from '../../rbac/repository/member-branch.repo.js';
+import { findRestaurantsWithRole } from '../../rbac/repository/restaurant_member.repo.js';
+import { memberService, MemberService } from '../../rbac/service/member.service.js';
+import { RestaurantMembership } from '../../rbac/type.js';
+import {
+  RestaurantService,
+  restaurantService,
+} from '../../restaurant/service/restaurant.service.js';
 import { SystemRole } from '../../users/enums.js';
 import {
-  createUser,
   findUserByEmail,
   findUserExistsByEmailOrPhone,
   updateUserPassword,
 } from '../../users/repository/users.repo.js';
+import { userService, UserService } from '../../users/service/users.service.js';
 import { ForgetPasswordDTO, LoginDTO, RegisterDTO, ResetPasswordDTO } from '../dto/auth.dto.js';
 import {
   CannotSignupAsSystemAdmin,
@@ -21,6 +28,7 @@ import {
   findLatestPasswordResetByUserId,
   updatePasswordResetConsumedAt,
 } from '../repository/auth.repo.js';
+import { JwtPayload } from '../type.js';
 import {
   comparePassword,
   createAccessToken,
@@ -32,46 +40,51 @@ import {
 } from '../utils.js';
 
 export class AuthService {
-  constructor(private readonly restaurantService: RestaurantService) {}
-  
+  constructor(
+    private readonly restaurantService: RestaurantService,
+    private readonly userService: UserService,
+    private readonly memberService: MemberService,
+  ) {}
+
   register = async (data: RegisterDTO) => {
     if (data.role === SystemRole.SYSTEM_ADMIN) {
       throw CannotSignupAsSystemAdmin;
     }
 
-    // 1. check if user exists by email
     const existing = await findUserExistsByEmailOrPhone(data.email, data.phone);
-
-    // 2. if exists we throw an error
     if (existing) {
       throw UserAlreadyExistsError;
     }
 
-    // 3. hashPassword
-    const hashedPassword = await hashPassword(data.password);
-
-    // 4. create user
     const trx = await db.transaction();
     let user;
     let restaurant;
+    let membershipsInfo: RestaurantMembership[] = [];
+
     try {
-      user = await createUser(
+      user = await this.userService.create(
         {
           email: data.email,
           phone: data.phone,
           name: data.name,
-          password_hash: hashedPassword,
+          password: data.password,
           system_role: data.role,
         },
         trx,
       );
 
-      // check if the type of user is restaurant, then call restaurant service to create a new restaurant
       if (data.role == SystemRole.RESTAURANT_USER) {
         if (data.restaurant == undefined) {
           throw RestaurantDataRequiredError;
         }
         restaurant = await this.restaurantService.create(user.id, data.restaurant, trx);
+
+        await this.memberService.createOwnerMember(restaurant.id, user.id, trx);
+        membershipsInfo.push({
+          restaurantId: restaurant.id,
+          restaurantRole: 'owner',
+          branchIds: [],
+        });
       }
 
       await trx.commit();
@@ -80,12 +93,14 @@ export class AuthService {
       throw error;
     }
 
-    // 5. create access token , refresh token
-    const payload = { userId: user.id, role: data.role, email: user.email };
-    const accessToken = createAccessToken(payload);
+    const payload: JwtPayload = {
+      userId: user.id,
+      role: data.role,
+      email: user.email,
+    };
+    const accessToken = createAccessToken({ ...payload, memberships: membershipsInfo });
     const refreshToken = createRefreshToken(payload);
 
-    // 6. return tokens and user data
     return {
       message: 'successfully registered user',
       accessToken,
@@ -102,22 +117,40 @@ export class AuthService {
   };
 
   login = async (data: LoginDTO) => {
-    // find the user by email input
     const user = await findUserByEmail(data.email);
     if (!user) {
       throw IncorrectCredentials;
     }
-    // compare passwords
+
     const match = await comparePassword(data.password, user.password_hash);
-    // if passwords doesnt match throw err
+
     if (!match) {
       throw IncorrectCredentials;
     }
-    // generate tokens
-    const payload = { userId: user.id, role: user.system_role, email: user.email };
-    const accessToken = createAccessToken(payload);
+
+    let membershipsInfo: RestaurantMembership[] = [];
+    if (user.system_role == SystemRole.RESTAURANT_USER) {
+      const rows = await findRestaurantsWithRole(user.id);
+      membershipsInfo = await Promise.all(
+        rows.map(async (row: { restaurant_id: number; member_id: number; role_name: string }) => {
+          const branchIds = await findBranchIdsByMemberId(row.member_id);
+          return {
+            restaurantId: row.restaurant_id,
+            restaurantRole: row.role_name,
+            branchIds: branchIds,
+          };
+        }),
+      );
+    }
+
+    const payload: JwtPayload = {
+      userId: user.id,
+      role: user.system_role,
+      email: user.email,
+    };
+    const accessToken = createAccessToken({ ...payload, memberships: membershipsInfo });
     const refreshToken = createRefreshToken(payload);
-    // return the data
+
     return {
       message: 'Login successful',
       accessToken,
@@ -191,4 +224,4 @@ export class AuthService {
   };
 }
 
-export const authService = new AuthService(restaurantService);
+export const authService = new AuthService(restaurantService, userService, memberService);

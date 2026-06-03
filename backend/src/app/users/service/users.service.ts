@@ -1,8 +1,27 @@
+import { Knex } from 'knex';
 import { UpdateUserDTO } from '../dto/users.dto.js';
 import { UserNotFoundError } from '../error.js';
-import { findUserById, updateUser } from '../repository/users.repo.js';
+import { createUser, findUserById, updateUser } from '../repository/users.repo.js';
+import { CreateUserData, User } from '../types.js';
+import { hashPassword } from '../../auth/utils.js';
 
+  
 export class UserService {
+
+  create = async (data: CreateUserData, trx?: Knex | Knex.Transaction): Promise<User> => {
+    const hashedPassword = data.password ? await hashPassword(data.password) : '';
+    return createUser(
+      {
+        email: data.email,
+        phone: data.phone,
+        name: data.name,
+        password_hash: hashedPassword,
+        system_role: data.system_role,
+      },
+      trx,
+    );
+  };
+
   getByUserId = async (userId: number) => {
     const user = await findUserById(userId);
     if (!user) {

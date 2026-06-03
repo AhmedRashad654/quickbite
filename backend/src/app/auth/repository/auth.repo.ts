@@ -1,3 +1,4 @@
+import { Knex } from 'knex';
 import { db } from '../../../lib/knex/knex.js';
 import { PasswordReset } from '../type.js';
 
@@ -9,8 +10,9 @@ const PASSWORD_RESET_COLUMNS = [
   'consumed_at',
   'created_at',
 ];
-export async function createPasswordReset(passwordReset: Partial<PasswordReset>) {
-  await db('password_resets').insert({
+export async function createPasswordReset(passwordReset: Partial<PasswordReset> , trx?: Knex.Transaction): Promise<void> {
+  const query = trx || db;
+  await query('password_resets').insert({
     user_id: passwordReset.user_id,
     otp_hash: passwordReset.otp_hash,
     expires_at: passwordReset.expires_at,
