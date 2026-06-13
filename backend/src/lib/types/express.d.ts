@@ -1,6 +1,7 @@
 declare namespace Express {
   interface Request {
     correlationId?: string;
+    rawBody?: Buffer;
     user?: {
       userId: number;
       role: string;

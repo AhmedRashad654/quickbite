@@ -1,68 +1,58 @@
 import { Request, Response, NextFunction } from 'express';
-import { container } from 'tsyringe';
-import { IdempotencyKeyRequiredError, ServiceUnavilable } from '../error/globalErorr.js';
+import { toSeconds } from '../utils/time.js';
+import { container } from '../di/container.js';
+import { ICacheProvider } from '../cache/cache.interface.js';
 import { TOKENS } from '../di/tokens.js';
-import { sendSuccess } from '../http/response.js';
+
+const TTL = toSeconds(1, 'd');
 
 interface IdempotencyOptions {
   strict?: boolean;
 }
 
 export function idempotency(options: IdempotencyOptions = {}) {
-  const strict = options.strict ?? false;
+  const { strict = false } = options;
 
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const method = req.method;
-
-    if (method !== 'POST' && method !== 'PATCH' && method !== 'PUT') {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    if (!['POST', 'PATCH', 'PUT'].includes(req.method)) {
       return next();
     }
 
-    const idempotencyKey = req.headers['idempotency-key'] as string;
+    const idempotencyKey = req.headers['idempotency-key'] as string | undefined;
 
     if (!idempotencyKey) {
       if (strict) {
-        throw IdempotencyKeyRequiredError;
+        return res.status(400).json({
+          error: 'Missing Idempotency-Key header',
+        });
       }
       return next();
     }
 
-    let cacheProvider: any;
-    const redisKey = `idempotency:${method.toLowerCase()}:${req.originalUrl}:${idempotencyKey}`;
-
     try {
-      cacheProvider = container.resolve(TOKENS.CacheProvider);
+      const cacheProvider: ICacheProvider = container.resolve(TOKENS.CacheProvider);
+      const key = `idempotency:${req.method}:${req.originalUrl}:${idempotencyKey}`;
 
-      const cachedResponseString = await cacheProvider.get(redisKey);
-      if (cachedResponseString) {
-        const cachedData = JSON.parse(cachedResponseString);
-        res.setHeader('X-Cache', 'HIT');
-        sendSuccess(res, cachedData.body.data, cachedData.status || 200);
-        return;
+      const cached = await cacheProvider.get(key);
+      if (cached) {
+        return res.status(200).json(JSON.parse(cached));
       }
+
+      const originalJson = res.json.bind(res);
+
+      res.json = (body: any) => {
+        cacheProvider.set(key, JSON.stringify(body), TTL);
+        return originalJson(body);
+      };
+
+      next();
     } catch {
       if (strict) {
-        throw ServiceUnavilable;
+        return res.status(503).json({
+          error: 'Idempotency service unavailable',
+        });
       }
+      next();
     }
-
-    const originalJson = res.json.bind(res);
-    res.json = (body: any): any => {
-      if (res.statusCode >= 200 && res.statusCode < 300 && cacheProvider) {
-        const responseToCache = {
-          status: res.statusCode,
-          body: body,
-        };
-
-        cacheProvider
-          .set(redisKey, JSON.stringify(responseToCache), 86400)
-          .catch(() => console.error('Error in set data in redis background'));
-      }
-      res.setHeader('X-Cache', 'MISS');
-
-      return originalJson(body);
-    };
-
-    return next();
   };
 }

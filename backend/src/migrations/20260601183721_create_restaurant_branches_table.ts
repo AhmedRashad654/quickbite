@@ -20,6 +20,7 @@ export async function up(knex: Knex): Promise<void> {
             created_at TIMESTAMP NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
             delivery_radius SMALLINT NOT NULL,
+            delivery_fee: INTRGER NOT NULL DEFAULT 0,
             currency currency_enum NOT NULL DEFAULT 'EGP',
             commission INT NOT NULL,
             location geography(Point, 4326) GENERATED ALWAYS AS ( ST_MakePoint(lng::float, lat::float)::geography) STORED,

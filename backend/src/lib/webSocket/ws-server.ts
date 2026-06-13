@@ -1,0 +1,62 @@
+import type { Server as HttpServer } from 'http';
+import { Server as IOServer } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { toMs } from '../utils/time.js';
+import { env } from '../config/env.js';
+import { container } from '../di/container.js';
+import { ICacheProvider } from '../cache/cache.interface.js';
+import { TOKENS } from '../di/tokens.js';
+import { authenticateHandshake, permittedChannels } from './ws-auth.js';
+import { Logger } from '../logger/logger.js';
+
+export function attechWsServer(httpServer: HttpServer): IOServer {
+  const io = new IOServer(httpServer, {
+    path: '/ws',
+    serveClient: false,
+    pingInterval: toMs(env.ws.heartbeatSec, 's'),
+  });
+
+  const cacheProvider = container.resolve<ICacheProvider>(TOKENS.CacheProvider);
+  const logger = container.resolve<Logger>(TOKENS.Logger);
+  const redisClient = cacheProvider.getRawClient();
+
+  io.adapter(createAdapter(redisClient, redisClient.duplicate()));
+
+  io.use((socket, next) => {
+    try {
+      const user = authenticateHandshake(socket.handshake);
+      socket.data.user = user;
+      socket.data.allowed = permittedChannels(user);
+      next();
+    } catch (err) {
+      next(err as Error);
+    }
+  });
+
+  io.on('connection', (socket) => {
+    const allowed: Set<string> = socket.data.allowed;
+    const user = socket.data.user;
+
+    socket.emit('hello', { allowedChannels: [...allowed] });
+
+    socket.on('subscribe', (channel: string, ack?: (res: unknown) => void) => {
+      if (typeof channel !== 'string' || !allowed.has(channel)) {
+        ack?.({ ok: false, error: 'not permitted' });
+        return;
+      }
+      socket.join(channel);
+      ack?.({ ok: true });
+      socket.emit('subscribed', { channel });
+    });
+
+    socket.on('unsubscribe', (channel: string) => {
+      if (typeof channel === 'string') socket.leave(channel);
+    });
+
+    socket.on('disconnect', (reason) => {
+      logger.info('ws disconnected', { userId: user.userId, reason });
+    });
+  });
+
+  return io;
+}

@@ -9,10 +9,12 @@ import {
   createBranch,
   findBranchById,
   findBranchesByRestaurant,
+  findBranchWithRestaurant,
   findNearbyBranches,
   updateBranch,
   updateBranchStatus,
 } from '../repository/branch.repo.js';
+import { BranchWithRestaurant } from '../type.js';
 
 @injectable()
 export class BranchService {
@@ -25,12 +27,7 @@ export class BranchService {
     return await findBranchesByRestaurant(restaurantId);
   };
 
-  create = async (
-    restaurantId: number,
-    userId: number,
-    userRole: SystemRole,
-    data: CreateBranchDTO,
-  ) => {
+  create = async (restaurantId: number, userId: number, userRole: SystemRole, data: CreateBranchDTO) => {
     const restaurant = await findRestaurantById(restaurantId);
 
     if (!restaurant) {
@@ -60,12 +57,7 @@ export class BranchService {
     return branch;
   };
 
-  update = async (
-    branchId: number,
-    userId: number,
-    userRole: SystemRole,
-    data: UpdateBranchDTO,
-  ) => {
+  update = async (branchId: number, userId: number, userRole: SystemRole, data: UpdateBranchDTO) => {
     const branch = await findBranchById(branchId);
     if (!branch) {
       throw BranchNotFoundError;
@@ -92,5 +84,5 @@ export class BranchService {
 
     return await updateBranchStatus(branchId, data);
   };
-}
 
+}

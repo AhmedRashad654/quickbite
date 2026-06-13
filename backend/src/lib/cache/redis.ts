@@ -23,6 +23,10 @@ export class RedisCacheProvider implements ICacheProvider {
     });
   }
 
+  getRawClient(): Redis {
+    return this.client;
+  }
+
   async set(key: string, value: any, ttlSeconds?: number): Promise<any> {
     if (ttlSeconds) {
       await this.client.set(key, value, 'EX', ttlSeconds);
@@ -37,5 +41,17 @@ export class RedisCacheProvider implements ICacheProvider {
 
   async del(key: string): Promise<any> {
     return this.client.del(key);
+  }
+
+  async delByPattern(pattern: string): Promise<void> {
+    let cursor = '0';
+    do {
+      const [nextCursor, keys] = await this.client.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+
+      cursor = nextCursor;
+      if (keys.length > 0) {
+        await this.client.del(...keys);
+      }
+    } while (cursor !== '0');
   }
 }

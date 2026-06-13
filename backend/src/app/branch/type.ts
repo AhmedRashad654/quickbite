@@ -12,10 +12,16 @@ export interface Branch {
   opens_at: string;
   closes_at: string;
   accept_orders: boolean;
+  delivery_fee:number;
   created_at: Date;
   updated_at: Date;
   delivery_radius: number;
   currency: Currency;
   commission: number;
   location: string;
+}
+
+export interface BranchWithRestaurant {
+  branch: Branch;
+  restaurantStatus: string;
 }

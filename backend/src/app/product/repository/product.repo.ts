@@ -82,3 +82,6 @@ export async function updateProduct(id: number, data: Partial<Product>): Promise
     .returning(PRODUCT_COLUMNS);
   return row;
 }
+
+
+
