@@ -5,9 +5,15 @@ import { Server as IoServer } from 'socket.io';
 import { container } from '../../../lib/di/container.js';
 import { KashierWebhookEnvelope } from '../../../lib/payments/kashier/types.js';
 import { InvalidWebhookSignatureError, MalformedWebhookError } from '../errors.js';
-import { Logger } from '../../../lib/logger/logger.js';
 import { markWebhookProcessed, recordWebhookOrSkip } from '../repository/payment-webhook-event.repo.js';
-import { PAYMENT_PROVIDER_IDS, PaymentProviderName, PaymentSessionStatus, TransactionMethod, TransactionStatus, TransactionType } from '../enums.js';
+import {
+  PAYMENT_PROVIDER_IDS,
+  PaymentProviderName,
+  PaymentSessionStatus,
+  TransactionMethod,
+  TransactionStatus,
+  TransactionType,
+} from '../enums.js';
 import { EVENT_KASHEIR_WEBHOOK, STATUS_KASHEIR_WEBHOOK } from '../../../lib/payments/kashier/enums.js';
 import { findOrderByPublicId, updateOrderStatus } from '../../order/repository/order.repo.js';
 import { findActiveSessionByOrderId, updateSession } from '../repository/payment-session.repo.js';
@@ -16,15 +22,13 @@ import { createTransaction } from '../repository/transaction.repo.js';
 import { OrderStatus } from '../../order/enums.js';
 import { findItemsByOrderIds } from '../../order/repository/order-item.repo.js';
 import { OrderStatusResponseDTO, OrderSummaryResponseDTO } from '../../order/dto/order.response.dto.js';
+import { logger } from '../../../lib/logger/logger.js';
 
 const KASHIER_PROVIDER_ID = PAYMENT_PROVIDER_IDS[PaymentProviderName.KASHIER];
 
 @injectable()
 export class KashierWebhookService {
-  constructor(
-    @inject(TOKENS.KashierProvider) private readonly kashier: kashierClient,
-    @inject(TOKENS.Logger) private readonly logger: Logger,
-  ) {}
+  constructor(@inject(TOKENS.KashierProvider) private readonly kashier: kashierClient) {}
 
   private get io(): IoServer {
     return container.resolve<IoServer>(TOKENS.WsServer);
@@ -49,7 +53,7 @@ export class KashierWebhookService {
     });
 
     if (!recorded) {
-      this.logger.info('kashier webhook duplicate, skipping', { transactionId: envelope.data.transactionId });
+      logger.info('kashier webhook duplicate, skipping', { transactionId: envelope.data.transactionId });
       return;
     }
 
@@ -58,7 +62,7 @@ export class KashierWebhookService {
       await markWebhookProcessed(recorded.id, null);
     } catch (err) {
       const msg = (err as Error).message ?? String(err);
-      this.logger.error('kashier webhook reconciliation failed', {
+      logger.error('kashier webhook reconciliation failed', {
         transactionId: envelope.data.transactionId,
         error: msg,
       });
@@ -69,19 +73,19 @@ export class KashierWebhookService {
 
   private async reconcile(envelope: KashierWebhookEnvelope): Promise<void> {
     if (envelope.event !== EVENT_KASHEIR_WEBHOOK.PAY) {
-      this.logger.info('kashier webhook event ignored', { event: envelope.event });
+      logger.info('kashier webhook event ignored', { event: envelope.event });
       return;
     }
 
     const order = await findOrderByPublicId(envelope.data.merchantOrderId);
     if (!order) {
-      this.logger.warn('kashier webhook for unknown order', { merchantOrderId: envelope.data.merchantOrderId });
+      logger.warn('kashier webhook for unknown order', { merchantOrderId: envelope.data.merchantOrderId });
       return;
     }
 
     const session = await findActiveSessionByOrderId(order.id);
     if (!session) {
-      this.logger.warn('kashier webhook with no active session for order', {
+      logger.warn('kashier webhook with no active session for order', {
         merchantOrderId: envelope.data.merchantOrderId,
         kashierOrderId: envelope.data.kashierOrderId,
       });
@@ -125,7 +129,9 @@ export class KashierWebhookService {
           this.io
             .to(`branch:${placed.branch_id}`)
             .emit('order.created', OrderSummaryResponseDTO.from(placed, items.length));
-          this.io.to(`customer:${placed.customer_id}`).emit('order.status_changed', OrderStatusResponseDTO.from(placed));
+          this.io
+            .to(`customer:${placed.customer_id}`)
+            .emit('order.status_changed', OrderStatusResponseDTO.from(placed));
           return;
         }
         await trx.commit();

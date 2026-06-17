@@ -1,8 +1,8 @@
-import type { Knex } from "knex";
+import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
-    // Insert predefined roles (only 3 roles as requested)
-    await knex.raw(`
+  // Insert predefined roles (only 3 roles as requested)
+  await knex.raw(`
         INSERT INTO roles (name, display_name, description, created_at, updated_at) VALUES
         ('owner', 'Restaurant Owner', 'Full access to all restaurant resources', NOW(), NOW()),
         ('branch_manager', 'Branch Manager', 'Manages branch operations and staff', NOW(), NOW()),
@@ -10,8 +10,13 @@ export async function up(knex: Knex): Promise<void> {
         ON CONFLICT (name) DO NOTHING;
     `);
 
-    // Insert permissions with AWS-like resource naming
-    await knex.raw(`
+
+
+ 
+ 
+
+  // Insert permissions with AWS-like resource naming
+  await knex.raw(`
         INSERT INTO permissions (resource, action, created_at) VALUES
         -- Product permissions
         ('core:product', 'create', NOW()),
@@ -29,21 +34,38 @@ export async function up(knex: Knex): Promise<void> {
         ('core:branch', 'update', NOW()),
 
         -- Restaurant settings permissions
-        ('core:restaurant', 'update', NOW())
+        ('core:restaurant', 'update', NOW()),
+
+        -- Orders permissions
+        ('orders', 'read', NOW()),
+        ('orders', 'accept', NOW()),
+        ('orders', 'update', NOW()),
+        ('orders', 'cancel', NOW()),
+
+        -- Payments permissions
+        ('payments', 'read', NOW()),
+        ('payments', 'refund', NOW()),
+
+        -- Delivery permissions
+        ('deliveries', 'assign', NOW()),
+ 
+        -- finance permissions
+        ('finance', 'read', NOW()),
+        ('finance', 'payout_create', NOW())
 
         ON CONFLICT (resource, action) DO NOTHING;
     `);
 
-    // Owner gets ALL permissions
-    await knex.raw(`
+  // Owner gets ALL permissions
+  await knex.raw(`
         INSERT INTO role_permissions (role_id, permission_id, created_at)
         SELECT r.id, p.id, NOW() FROM roles r, permissions p
         WHERE r.name = 'owner'
         ON CONFLICT DO NOTHING;
     `);
 
-    // Branch Manager permissions - product CRUD, member read, branch update
-    await knex.raw(`
+  // Branch Manager permissions - product CRUD, member read, branch update
+  await knex.raw(`
         INSERT INTO role_permissions (role_id, permission_id, created_at)
         SELECT r.id, p.id, NOW() FROM roles r, permissions p
         WHERE r.name = 'branch_manager'
@@ -52,26 +74,34 @@ export async function up(knex: Knex): Promise<void> {
             'core:product:read',
             'core:product:update',
             'core:member:read',
-            'core:branch:update'
+            'core:branch:update',
+            'core:orders:read',
+            'core:orders:accept',
+            'core:orders:update',
+            'core:orders:cancel',
+            'core:finance:read',
         )
         ON CONFLICT DO NOTHING;
     `);
 
-    // Staff permissions - read only
-    await knex.raw(`
+  // Staff permissions - read only
+  await knex.raw(`
         INSERT INTO role_permissions (role_id, permission_id, created_at)
         SELECT r.id, p.id, NOW() FROM roles r, permissions p
         WHERE r.name = 'staff'
         AND p.resource || ':' || p.action IN (
             'core:product:read',
-            'core:member:read'
+            'core:member:read',
+            'core:orders:read',
+            'core:orders:accept',
+            'core:orders:update',
         )
         ON CONFLICT DO NOTHING;
     `);
 }
 
 export async function down(knex: Knex): Promise<void> {
-    await knex.raw(`
+  await knex.raw(`
         DELETE FROM role_permissions;
         DELETE FROM permissions;
         DELETE FROM roles WHERE name IN ('owner', 'branch_manager', 'staff');

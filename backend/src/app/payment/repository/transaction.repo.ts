@@ -40,6 +40,31 @@ export async function createTransaction(input: CreateTransactionInput, conn: Kne
   return row;
 }
 
+export async function createTransactionIdempotent(
+  input: CreateTransactionInput,
+  conn: Knex,
+): Promise<Transaction | null> {
+  const [row] = await conn('transactions')
+    .insert({
+      order_id: input.order_id,
+      transaction_type: input.transaction_type,
+      method: input.method,
+      provider_id: input.provider_id,
+      provider_reference_id: input.provider_reference_id,
+      status: input.status,
+      amount: input.amount,
+      currency: input.currency,
+      src_acc_id: input.src_acc_id,
+      dst_acc_id: input.dst_acc_id,
+      idempotency_key: input.idempotency_key,
+    })
+    .onConflict('idempotency_key')
+    .ignore()
+    .returning(TRANSACTION_COLUMNS as unknown as string[]);
+
+  return row || null;
+}
+
 export async function findTransactionById(id: number, conn: Knex = db): Promise<Transaction | null> {
   const row = await conn('transactions')
     .select(TRANSACTION_COLUMNS as unknown as string[])

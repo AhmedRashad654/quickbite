@@ -49,6 +49,16 @@ const schema = z.object({
 
   PAYMENT_SESSION_TIMEOUT_MIN: z.string().default('15'),
 
+  // Deliveries / agents
+  ASSIGNMENT_TICK_SEC: z.string().default('10'),
+  ASSIGNMENT_BATCH: z.string().default('20'),
+  ASSIGNMENT_MAX_ATTEMPTS: z.string().default('3'),
+  ASSIGNMENT_RADIUS_METERS: z.string().default('5000'),
+  ASSIGNMENT_OFFER_TTL_SEC: z.string().default('30'),
+  ASSIGNMENT_CANDIDATES: z.string().default('5'),
+  PRESENCE_STALE_SEC: z.string().default('300'),
+  ASSIGNMENT_CLAIM_TTL_SEC: z.string().default('300'),
+  AGENT_EARNING_SHARE_BPS: z.string().default('8000'),
 });
 
 const parsed = schema.parse(process.env);
@@ -102,5 +112,17 @@ export const env = {
     paymentType: parsed.KASHIER_PAYMENT_TYPE,
     returnUrl: parsed.KASHIER_RETURN_URL,
     webhookUrl: parsed.KASHIER_WEBHOOK_URL,
+  },
+
+  delivery: {
+    assignmentTickSec: Number(parsed.ASSIGNMENT_TICK_SEC),
+    batch: Number(parsed.ASSIGNMENT_BATCH),
+    maxAttempts: Number(parsed.ASSIGNMENT_MAX_ATTEMPTS),
+    radiusMeters: Number(parsed.ASSIGNMENT_RADIUS_METERS),
+    offerTtlSec: Number(parsed.ASSIGNMENT_OFFER_TTL_SEC),
+    candidates: Number(parsed.ASSIGNMENT_CANDIDATES),
+    presenceStaleSec: Number(parsed.PRESENCE_STALE_SEC),
+    claimTtlSec: Number(parsed.ASSIGNMENT_CLAIM_TTL_SEC),
+    agentEarningShareBps: Number(parsed.AGENT_EARNING_SHARE_BPS),
   },
 };

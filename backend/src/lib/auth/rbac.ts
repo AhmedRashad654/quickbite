@@ -130,3 +130,9 @@ export function requireBranchAccess(paramName: string = 'branchId') {
     }
   };
 }
+
+export function requireAgent(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) return res.status(401).json({ error: 'User not authenticated' });
+  if (req.user.role !== SystemRole.DELIVERY_AGENT) return res.status(403).json({ error: 'Agent role required' });
+  next();
+}

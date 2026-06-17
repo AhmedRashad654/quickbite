@@ -7,6 +7,11 @@ import { branchRouter } from './app/branch/routes.js';
 import { restaurantRouter } from './app/restaurant/routes.js';
 import { productRouter } from './app/product/routes.js';
 import { rbacRouter } from './app/rbac/routes.js';
+import { financeRouter } from './app/finance/routes.js';
+import { assignmentRouter } from './app/assignment/routes.js';
+import { agentRouter } from './app/agent/routes.js';
+import { paymentRouter } from './app/payment/routes.js';
+import { orderRouter } from './app/order/routes.js';
 
 export const routes = Router();
 
@@ -18,3 +23,8 @@ routes.use('/restaurant', restaurantRouter);
 routes.use('/branches', branchRouter);
 routes.use('/products', productRouter);
 routes.use('/members', rbacRouter);
+routes.use('/orders', orderRouter);
+routes.use('/payments', paymentRouter);
+routes.use('/agents', agentRouter);
+routes.use('/assignment', assignmentRouter);
+routes.use('/finance', financeRouter);

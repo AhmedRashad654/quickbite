@@ -29,6 +29,14 @@ import { kashierClient } from '../payments/kashier/kashier.client.js';
 import { PaymentService } from '../../app/payment/service/payment.service.js';
 import { WebhookController } from '../../app/payment/controller/webhook.controller.js';
 import { KashierWebhookService } from '../../app/payment/service/kashier-webhook.service.js';
+import { AssignmentService } from '../../app/assignment/service/assignment.service.js';
+import { AssignmentController } from '../../app/assignment/controller/assignment.controller.js';
+import { PresenceService } from '../../app/agent/service/presence.service.js';
+import { SettlementService } from '../../app/agent/service/settlement.service.js';
+import { FinanceService } from '../../app/finance/service/finance.service.js';
+import { FinanceController } from '../../app/finance/controller/finance.controller.js';
+import { AgentService } from '../../app/agent/service/agent.service.js';
+import { AgentController } from '../../app/agent/controller/agent.controller.js';
 
 // Infrastructure
 container.registerSingleton<Logger>(TOKENS.Logger, Logger);
@@ -48,6 +56,11 @@ container.registerSingleton<AuthService>(TOKENS.AuthService, AuthService);
 container.registerSingleton<OrderService>(TOKENS.OrderService, OrderService);
 container.registerSingleton<PaymentService>(TOKENS.PaymentService, PaymentService);
 container.registerSingleton<KashierWebhookService>(TOKENS.KashierWebhookService, KashierWebhookService);
+container.registerSingleton<AssignmentService>(TOKENS.AssignmentService, AssignmentService);
+container.registerSingleton<PresenceService>(TOKENS.PresenceService, PresenceService);
+container.registerSingleton<SettlementService>(TOKENS.SettlementService, SettlementService);
+container.registerSingleton<FinanceService>(TOKENS.FinanceService, FinanceService);
+container.registerSingleton<AgentService>(TOKENS.AgentService, AgentService);
 
 // Controller
 container.registerSingleton<AuthController>(TOKENS.AuthController, AuthController);
@@ -59,5 +72,8 @@ container.registerSingleton<MemberController>(TOKENS.MemberController, MemberCon
 container.registerSingleton<CustomerAddressController>(TOKENS.CustomerAddressController, CustomerAddressController);
 container.registerSingleton<OrderController>(TOKENS.OrderController, OrderController);
 container.registerSingleton<WebhookController>(TOKENS.WebhookController, WebhookController);
+container.registerSingleton<AssignmentController>(TOKENS.AssignmentController, AssignmentController);
+container.registerSingleton<FinanceController>(TOKENS.FinanceController, FinanceController);
+container.registerSingleton<AgentController>(TOKENS.AgentController, AgentController);
 
 export { container };

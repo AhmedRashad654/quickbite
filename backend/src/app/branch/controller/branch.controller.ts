@@ -6,7 +6,6 @@ import { SystemRole } from '../../users/enums.js';
 import { inject, injectable } from 'tsyringe';
 import { TOKENS } from '../../../lib/di/tokens.js';
 import { sendSuccess } from '../../../lib/http/response.js';
-import { BranchNotFoundError } from '../errors.js';
 
 @injectable()
 export class BranchController {

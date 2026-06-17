@@ -19,7 +19,6 @@ export async function up(knex: Knex): Promise<void> {
             accept_orders BOOLEAN NOT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            delivery_radius SMALLINT NOT NULL,
             delivery_fee: INTRGER NOT NULL DEFAULT 0,
             currency currency_enum NOT NULL DEFAULT 'EGP',
             commission INT NOT NULL,

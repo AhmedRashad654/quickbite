@@ -1,5 +1,6 @@
 import { Knex } from 'knex';
 import { InsertOrderItemInput, OrderItem } from '../types.js';
+import { db } from '../../../lib/knex/knex.js';
 
 export const ORDER_ITEM_COLUMNS = [
   'id',
@@ -21,7 +22,7 @@ export async function bulkInsertItems(orderItems: InsertOrderItemInput[], conn: 
   return rows;
 }
 
-export async function findItemsByOrderIds(orderIds: number[], conn: Knex): Promise<OrderItem[]> {
+export async function findItemsByOrderIds(orderIds: number[], conn: Knex = db): Promise<OrderItem[]> {
   if (orderIds.length === 0) return [];
   const rows = await conn('order_items')
     .select(ORDER_ITEM_COLUMNS as unknown as string[])

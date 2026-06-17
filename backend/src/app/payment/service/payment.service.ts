@@ -6,16 +6,15 @@ import { env } from '../../../lib/config/env.js';
 import { Order } from '../../order/types.js';
 import { createSession, findActiveSessionByOrderId } from '../repository/payment-session.repo.js';
 import { fromMinor } from '../../../lib/utils/money.js';
-import { Logger } from '../../../lib/logger/logger.js';
 import { PaymentProviderUnavailableError } from '../errors.js';
 import { PAYMENT_PROVIDER_IDS, PaymentProviderName, PaymentSessionStatus } from '../enums.js';
 import { kashierClient } from '../../../lib/payments/kashier/kashier.client.js';
+import { logger } from '../../../lib/logger/logger.js';
 
 @injectable()
 export class PaymentService {
   constructor(
-    @inject(TOKENS.KashierProvider) private readonly kashier: kashierClient,
-    @inject(TOKENS.Logger) private readonly logger: Logger,
+    @inject(TOKENS.KashierProvider) private readonly kashier: kashierClient
   ) {}
 
   async initOnlinePayment(order: Order): Promise<InitOnlinePaymentResult> {
@@ -41,7 +40,7 @@ export class PaymentService {
         customerReference: String(order.customer_id),
       });
     } catch (err) {
-      this.logger.error('kashier createSession failed', {
+      logger.error('kashier createSession failed', {
         orderPublicId: order.public_id,
         error: (err as Error).message,
       });

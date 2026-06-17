@@ -1,9 +1,3 @@
-export enum Currency {
-  EGP = 'EGP',
-  SAR = 'SAR',
-  AED = 'AED',
-  USD = 'USD',
-}
 export enum OrderStatus {
   PENDING_PAYMENT = 'pending_payment',
   PLACED = 'placed',

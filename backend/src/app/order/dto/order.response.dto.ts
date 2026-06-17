@@ -105,3 +105,51 @@ export class OrderStatusResponseDTO {
     return dto;
   }
 }
+
+export class OrderDetailResponseDTO {
+  publicId!: string;
+  status!: OrderStatus;
+  paymentMethod!: PaymentMethod;
+  branch!: { id: number };
+  restaurant!: { id: number };
+  customerAddress!: { lat: number; lng: number; addressText: string };
+  subtotal!: number;
+  deliveryFee!: number;
+  serviceFee!: number;
+  total!: number;
+  currency!: string;
+  items!: OrderItemResponseDTO[];
+  createdAt!: string;
+  history!: Array<{ status: OrderStatus; ts: string }>;
+
+  static from(order: Order, items: OrderItem[]): OrderDetailResponseDTO {
+    const dto = new OrderDetailResponseDTO();
+    const base = OrderResponseDTO.from(order, items);
+    Object.assign(dto, base);
+    dto.history = buildHistory(order);
+    return dto;
+  }
+}
+
+function buildHistory(order: Order): Array<{ status: OrderStatus; ts: string }> {
+  const out: Array<{ status: OrderStatus; ts: string }> = [];
+  const push = (status: OrderStatus, ts: Date | null | undefined) => {
+    if (ts) out.push({ status, ts: ts.toISOString() });
+  };
+
+  if (order.payment_method === PaymentMethod.ONLINE) {
+    push(OrderStatus.PENDING_PAYMENT, order.created_at);
+    push(OrderStatus.PLACED, order.created_at);
+  } else {
+    push(OrderStatus.PLACED, order.created_at);
+  }
+  push(OrderStatus.ACCEPTED, order.accepted_at);
+  push(OrderStatus.REJECTED, order.rejected_at);
+  push(OrderStatus.READY, order.ready_at);
+  push(OrderStatus.ASSIGNED, order.assigned_at);
+  push(OrderStatus.PICKED, order.picked_at);
+  push(OrderStatus.DELIVERED, order.delivered_at);
+  push(OrderStatus.CANCELLED, order.cancelled_at);
+
+  return out;
+}

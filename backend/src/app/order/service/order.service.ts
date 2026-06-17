@@ -2,7 +2,7 @@ import { injectable } from 'tsyringe';
 import { JwtPayloadType } from '../../../lib/types/jwtPayload.js';
 import { CreateOrderDTO } from '../dto/order.dto.js';
 import { RestaurantStatus } from '../../restaurant/enums.js';
-import { BranchNotAcceptingOrdersError, outOfStockError } from '../errors.js';
+import { BranchNotAcceptingOrdersError, OrderNotFoundError, outOfStockError } from '../errors.js';
 import { findAddressById } from '../../customer_address/repository/customer-address.repo.js';
 import { findBranchWithRestaurant } from '../../branch/repository/branch.repo.js';
 import { BranchNotFoundError } from '../../branch/errors.js';
@@ -16,16 +16,14 @@ import { BranchProduct, Order, OrderItem, OrderLineDraft, UnavailableItem } from
 import { multiplyMinor, sumMinor } from '../../../lib/utils/money.js';
 import { randomUUID } from 'crypto';
 import { db } from '../../../lib/knex/knex.js';
-import { createOrder, updateOrderStatus } from '../repository/order.repo.js';
+import { createOrder, findOrderByPublicId, updateOrderStatus } from '../repository/order.repo.js';
 import { OrderStatus, PaymentMethod } from '../enums.js';
 import { CustomerAddress } from '../../customer_address/type.js';
-import { bulkInsertItems } from '../repository/order-item.repo.js';
-import { OrderResponseDTO, OrderSummaryResponseDTO } from '../dto/order.response.dto.js';
+import { bulkInsertItems, findItemsByOrderIds } from '../repository/order-item.repo.js';
+import { OrderDetailResponseDTO, OrderResponseDTO, OrderSummaryResponseDTO } from '../dto/order.response.dto.js';
 import { Server as IoServer } from 'socket.io';
 import { container } from '../../../lib/di/container.js';
 import { TOKENS } from '../../../lib/di/tokens.js';
-
-
 
 const SERVICE_FEE_MINOR = 1000;
 
@@ -138,6 +136,13 @@ export class OrderService {
     return OrderResponseDTO.from(order, items, paymentInfo);
   }
 
+  async getOrder(publicId: string): Promise<OrderDetailResponseDTO> {
+    const order = await findOrderByPublicId(publicId);
+    if (!order) throw OrderNotFoundError;
+    const items = await findItemsByOrderIds([order.id]);
+    return OrderDetailResponseDTO.from(order, items);
+  }
+
 
   // ── private helpers ──────────────────────────────────────────────────
   private buildOrderLineDrafts(
@@ -187,5 +192,4 @@ export class OrderService {
     const parts = [a.building, a.street, a.city, a.country].filter(Boolean);
     return parts.join(', ');
   }
-  
 }

@@ -54,6 +54,11 @@ export async function findBranchById(id: number): Promise<Branch | null> {
   return row || null;
 }
 
+export async function findBranchsByIds(ids: number[]): Promise<Branch[]> {
+  const rows = await db('restaurant_branches').select(BRANCH_COLUMNS).whereIn('id', ids).first();
+  return rows;
+}
+
 export async function updateBranch(id: number, data: Partial<Branch>): Promise<Branch> {
   const mapped: Record<string, unknown> = {};
   if (data.label !== undefined) mapped.label = data.label;

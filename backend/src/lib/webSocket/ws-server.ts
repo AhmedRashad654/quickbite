@@ -7,9 +7,9 @@ import { container } from '../di/container.js';
 import { ICacheProvider } from '../cache/cache.interface.js';
 import { TOKENS } from '../di/tokens.js';
 import { authenticateHandshake, permittedChannels } from './ws-auth.js';
-import { Logger } from '../logger/logger.js';
+import { logger } from '../logger/logger.js';
 
-export function attechWsServer(httpServer: HttpServer): IOServer {
+export function attachWsServer(httpServer: HttpServer): IOServer {
   const io = new IOServer(httpServer, {
     path: '/ws',
     serveClient: false,
@@ -17,7 +17,6 @@ export function attechWsServer(httpServer: HttpServer): IOServer {
   });
 
   const cacheProvider = container.resolve<ICacheProvider>(TOKENS.CacheProvider);
-  const logger = container.resolve<Logger>(TOKENS.Logger);
   const redisClient = cacheProvider.getRawClient();
 
   io.adapter(createAdapter(redisClient, redisClient.duplicate()));

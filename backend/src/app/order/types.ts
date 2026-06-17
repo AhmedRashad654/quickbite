@@ -1,8 +1,9 @@
-import { Currency, OrderStatus, PaymentMethod } from './enums.js';
+import { Currency } from '../branch/enums.js';
+import { OrderStatus, PaymentMethod } from './enums.js';
 export interface Order {
   id: number;
   public_id: string;
-  restaurant_owner_id?:number
+  restaurant_owner_id: number | null;
   country_code: string;
   restaurant_id: number;
   branch_id: number;
@@ -26,6 +27,7 @@ export interface Order {
   rejected_at: Date | null;
   ready_at: Date | null;
   assigned_at: Date | null;
+  delivery_agent_id: number | null;
   picked_at: Date | null;
   delivered_at: Date | null;
   cancelled_at: Date | null;
@@ -98,15 +100,15 @@ export interface BranchProduct {
 }
 
 export interface OrderLineDraft {
-    product_id: number;
-    quantity: number;
-    unit_price: number;
-    line_total: number;
-    name: string;
-    image_url: string | null;
+  product_id: number;
+  quantity: number;
+  unit_price: number;
+  line_total: number;
+  name: string;
+  image_url: string | null;
 }
 export interface UnavailableItem {
-    product_id: number;
-    requested: number;
-    available: number;
+  product_id: number;
+  requested: number;
+  available: number;
 }

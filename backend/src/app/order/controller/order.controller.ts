@@ -9,10 +9,15 @@ import { sendSuccess } from '../../../lib/http/response.js';
 @injectable()
 export class OrderController {
   constructor(@inject(TOKENS.OrderService) private readonly orderService: OrderService) {}
-  
+
   placeOrder = async (req: Request, res: Response) => {
     const data = await validateBody(CreateOrderDTO, req.body);
     const result = await this.orderService.placeOrder(req.user!, data);
     sendSuccess(res, result, 201);
+  };
+
+  getOrder = async (req: Request, res: Response) => {
+    const result = await this.orderService.getOrder(String(req.params.publicId));
+    sendSuccess(res, result);
   };
 }

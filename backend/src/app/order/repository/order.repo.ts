@@ -63,7 +63,7 @@ export async function findOrderByPublicId(publicId: string, conn: Knex = db): Pr
   };
 }
 
-export async function findReadyUnassigned(limit: number, conn: Knex): Promise<Order[]> {
+export async function findReadyUnassigned(limit: number, conn: Knex = db): Promise<Order[]> {
   const rows = await conn('orders')
     .select(ORDER_COLUMNS)
     .where('status', 'ready')
@@ -108,7 +108,7 @@ export async function findAgentTasks(
   agentId: number,
   statuses: string[] | undefined,
   limit: number,
-  conn: Knex,
+  conn: Knex = db,
 ): Promise<Order[]> {
   let q = conn('orders')
     .select(ORDER_COLUMNS as unknown as string[])
