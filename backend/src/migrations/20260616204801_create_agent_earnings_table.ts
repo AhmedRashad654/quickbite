@@ -4,7 +4,7 @@ import type {Knex} from "knex";
 export async function up(knex: Knex): Promise<void> {
     await knex.raw(`
         CREATE TABLE agent_earnings (
-            id          ERIAL PRIMARY KEY,
+            id          SERIAL PRIMARY KEY,
             region      TEXT NOT NULL,
             agent_id    INT NOT NULL,
             order_id    INT NOT NULL,

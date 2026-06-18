@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { healthRouter } from './app/health/health.routes.js';
 import { usersRouter } from './app/users/routes.js';
-import { authRouter } from './app/auth/route.js';
+import { authRouter } from './app/auth/routes.js';
 import { customerAddressRouter } from './app/customer_address/routes.js';
 import { branchRouter } from './app/branch/routes.js';
 import { restaurantRouter } from './app/restaurant/routes.js';

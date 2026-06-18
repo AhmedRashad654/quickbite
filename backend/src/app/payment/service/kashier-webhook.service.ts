@@ -1,9 +1,8 @@
 import { inject, injectable } from 'tsyringe';
 import { TOKENS } from '../../../lib/di/tokens.js';
-import { kashierClient } from '../../../lib/payments/kashier/kashier.client.js';
 import { Server as IoServer } from 'socket.io';
 import { container } from '../../../lib/di/container.js';
-import { KashierWebhookEnvelope } from '../../../lib/payments/kashier/types.js';
+import { IPaymentProvider, KashierWebhookEnvelope } from '../../../lib/payments/kashier/types.js';
 import { InvalidWebhookSignatureError, MalformedWebhookError } from '../errors.js';
 import { markWebhookProcessed, recordWebhookOrSkip } from '../repository/payment-webhook-event.repo.js';
 import {
@@ -28,7 +27,7 @@ const KASHIER_PROVIDER_ID = PAYMENT_PROVIDER_IDS[PaymentProviderName.KASHIER];
 
 @injectable()
 export class KashierWebhookService {
-  constructor(@inject(TOKENS.KashierProvider) private readonly kashier: kashierClient) {}
+  constructor(@inject(TOKENS.KashierProvider) private readonly kashier: IPaymentProvider) {}
 
   private get io(): IoServer {
     return container.resolve<IoServer>(TOKENS.WsServer);

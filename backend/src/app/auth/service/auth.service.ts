@@ -26,7 +26,6 @@ import {
   findLatestPasswordResetByUserId,
   updatePasswordResetConsumedAt,
 } from '../repository/auth.repo.js';
-import { JwtPayload } from '../type.js';
 import {
   comparePassword,
   createAccessToken,
@@ -39,6 +38,7 @@ import {
 import { TOKENS } from '../../../lib/di/tokens.js';
 import { passwordResetEmail } from '../templates/password-reset.js';
 import { MailjetEmailProvider } from '../../../lib/email/mailjet.js';
+import { JwtPayloadType } from '../../../lib/types/jwtPayload.js';
 
 @injectable()
 export class AuthService {
@@ -96,12 +96,13 @@ export class AuthService {
       throw error;
     }
 
-    const payload: JwtPayload = {
+    const payload: JwtPayloadType = {
       userId: user.id,
       role: data.role,
       email: user.email,
+      memberships: membershipsInfo,
     };
-    const accessToken = createAccessToken({ ...payload, memberships: membershipsInfo });
+    const accessToken = createAccessToken(payload);
     const refreshToken = createRefreshToken(payload);
 
     return {
@@ -112,8 +113,8 @@ export class AuthService {
         id: user.id,
         email: user.email,
         phone: user.phone,
-        systemRole: user.system_role,
-        createdAt: user.created_at,
+        system_role: user.system_role,
+        created_at: user.created_at,
       },
       restaurant,
     };
@@ -146,12 +147,13 @@ export class AuthService {
       );
     }
 
-    const payload: JwtPayload = {
+    const payload: JwtPayloadType = {
       userId: user.id,
       role: user.system_role,
       email: user.email,
+      memberships: membershipsInfo,
     };
-    const accessToken = createAccessToken({ ...payload, memberships: membershipsInfo });
+    const accessToken = createAccessToken(payload);
     const refreshToken = createRefreshToken(payload);
 
     return {
@@ -162,8 +164,8 @@ export class AuthService {
         id: user.id,
         email: user.email,
         phone: user.phone,
-        systemRole: user.system_role,
-        createdAt: user.created_at,
+        system_role: user.system_role,
+        created_at: user.created_at,
       },
     };
   };

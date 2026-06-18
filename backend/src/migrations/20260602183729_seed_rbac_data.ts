@@ -79,7 +79,7 @@ export async function up(knex: Knex): Promise<void> {
             'core:orders:accept',
             'core:orders:update',
             'core:orders:cancel',
-            'core:finance:read',
+            'core:finance:read'
         )
         ON CONFLICT DO NOTHING;
     `);
@@ -94,7 +94,7 @@ export async function up(knex: Knex): Promise<void> {
             'core:member:read',
             'core:orders:read',
             'core:orders:accept',
-            'core:orders:update',
+            'core:orders:update'
         )
         ON CONFLICT DO NOTHING;
     `);

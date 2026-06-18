@@ -7,5 +7,4 @@ export const NotInCandidateListError = new AppError('NotInCandidateList', 403);
 export const OrderAlreadyClaimedError = new AppError('OrderAlreadyClaimed', 409);
 export const OrderNotInReadyStateError = new AppError('OrderNotInReadyState', 409);
 export const NotYourTaskError = new AppError('NotYourTask', 403);
-export const AgentNotOnlineError = new AppError('AgentNotOnline', 409);
 export const AgentIdIsRequiredError = new AppError('agentId is required', 400);

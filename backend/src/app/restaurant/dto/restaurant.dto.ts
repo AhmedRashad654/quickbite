@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { RestaurantStatus } from '../enums.js';
+import { Country } from '../../branch/enums.js';
 
 export class CreateRestaurantDTO {
   @IsString()
@@ -22,8 +23,7 @@ export class CreateRestaurantDTO {
   @IsString()
   logo_url?: string;
 
-  @IsString()
-  @MinLength(1)
+  @IsEnum(Country)
   primary_country!: string;
 }
 
@@ -38,8 +38,7 @@ export class UpdateRestaurantDTO {
   logo_url?: string;
 
   @IsOptional()
-  @IsString()
-  @IsNotEmpty()
+  @IsEnum(Country)
   primary_country?: string;
 }
 
@@ -58,7 +57,7 @@ export class CreateRestaurantWithOwnerDTO {
   logo_url?: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsEnum(Country)
   primary_country!: string;
 }
 

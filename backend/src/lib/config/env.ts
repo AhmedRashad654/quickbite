@@ -94,7 +94,7 @@ export const env = {
     mailjetApiKey: parsed.MAILJET_API_KEY,
     mailjetSecretKey: parsed.MAILJET_SECRET_KEY,
     mailjetFromEmail: parsed.MAILJET_FROM_EMAIL,
-    mailjetFormName: parsed.MAILJET_FROM_NAME,
+    mailjetFromName: parsed.MAILJET_FROM_NAME,
   },
   ws: {
     heartbeatSec: Number(parsed.WS_HEARTBEAT_SEC),

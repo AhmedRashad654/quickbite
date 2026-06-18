@@ -4,14 +4,15 @@ import { container } from '../di/container.js';
 import { ICacheProvider } from '../cache/cache.interface.js';
 import { TOKENS } from '../di/tokens.js';
 
-const TTL = toSeconds(1, 'd');
+const DEFAULT_TTL = toSeconds(5, 'm'); 
 
 interface IdempotencyOptions {
   strict?: boolean;
+  ttlSeconds?: number;
 }
 
 export function idempotency(options: IdempotencyOptions = {}) {
-  const { strict = false } = options;
+  const { strict = false, ttlSeconds = DEFAULT_TTL } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
     if (!['POST', 'PATCH', 'PUT'].includes(req.method)) {
@@ -22,9 +23,7 @@ export function idempotency(options: IdempotencyOptions = {}) {
 
     if (!idempotencyKey) {
       if (strict) {
-        return res.status(400).json({
-          error: 'Missing Idempotency-Key header',
-        });
+        return res.status(400).json({ error: 'Missing Idempotency-Key header' });
       }
       return next();
     }
@@ -33,24 +32,32 @@ export function idempotency(options: IdempotencyOptions = {}) {
       const cacheProvider: ICacheProvider = container.resolve(TOKENS.CacheProvider);
       const key = `idempotency:${req.method}:${req.originalUrl}:${idempotencyKey}`;
 
-      const cached = await cacheProvider.get(key);
-      if (cached) {
-        return res.status(200).json(JSON.parse(cached));
+      const isLockAcquired = await cacheProvider.trySet(key, 'PROCESSING', ttlSeconds);
+
+      if (!isLockAcquired) {
+        const cachedValue = await cacheProvider.get(key);
+        
+        if (cachedValue === 'PROCESSING') {
+          return res.status(409).json({ error: 'Concurrent request in progress. Please wait.' });
+        }
+        
+        if (cachedValue) {
+          return res.status(200).json(JSON.parse(cachedValue));
+        }
       }
 
       const originalJson = res.json.bind(res);
 
       res.json = (body: any) => {
-        cacheProvider.set(key, JSON.stringify(body), TTL);
+        cacheProvider.set(key, JSON.stringify(body), ttlSeconds);
         return originalJson(body);
       };
 
       next();
-    } catch {
+    } catch(error) {
+      console.log(error)
       if (strict) {
-        return res.status(503).json({
-          error: 'Idempotency service unavailable',
-        });
+        return res.status(503).json({ error: 'Idempotency service unavailable' });
       }
       next();
     }

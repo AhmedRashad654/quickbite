@@ -21,7 +21,7 @@ export class MailjetEmailProvider implements IEmailProvider {
           {
             From: {
               Email: env.mailjet.mailjetFromEmail,
-              Name: env.mailjet.mailjetFormName,
+              Name: env.mailjet.mailjetFromName,
             },
             To: [
               {

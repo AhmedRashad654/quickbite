@@ -3,12 +3,12 @@ import type { Knex } from 'knex';
 export async function up(knex: Knex): Promise<void> {
   await knex.raw(`
         CREATE EXTENSION IF NOT EXISTS postgis;
-        CREATE TYPE currency_enum AS ENUM('EGP','SAR', 'AED', 'USD');
+        CREATE TYPE currency_enum AS ENUM('EGP','SAR');
         
         CREATE TABLE restaurant_branches (
             id BIGSERIAL PRIMARY KEY,
-            restaurant_id BIGINT NOT NULL,
-            country_code CHAR(2) NOT NULL,
+            restaurant_id INT NOT NULL,
+            country_code country_enum NOT NULL,
             address_text TEXT NOT NULL,
             label TEXT NOT NULL,
             lat DECIMAL(9, 6) NOT NULL,
@@ -19,8 +19,8 @@ export async function up(knex: Knex): Promise<void> {
             accept_orders BOOLEAN NOT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            delivery_fee: INTRGER NOT NULL DEFAULT 0,
-            currency currency_enum NOT NULL DEFAULT 'EGP',
+            delivery_fee INTEGER NOT NULL DEFAULT 0,
+            currency currency_enum NOT NULL,
             commission INT NOT NULL,
             location geography(Point, 4326) GENERATED ALWAYS AS ( ST_MakePoint(lng::float, lat::float)::geography) STORED,
             
@@ -37,5 +37,7 @@ export async function up(knex: Knex): Promise<void> {
 export async function down(knex: Knex): Promise<void> {
   await knex.raw(`
         DROP TABLE restaurant_branches;
+        DROP TYPE IF EXISTS country_enum;
+        DROP TYPE IF EXISTS currency_enum;
     `);
 }

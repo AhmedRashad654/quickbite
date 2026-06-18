@@ -18,7 +18,7 @@ export function createApp() {
   app.use(correlationId);
   app.use('/api/v1', routes);
   app.use((req, _res, next) => {
-    const error = new AppError(`Cannot find ${req.originalUrl} on this server`, 404);
+    const error = new AppError(`Cannot find ${req.originalUrl} on this server`, 404, true, true);
     next(error);
   });
   app.use(errorHandler);

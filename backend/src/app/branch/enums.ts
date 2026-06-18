@@ -1,6 +1,11 @@
 export enum Currency {
   EGP = 'EGP',
   SAR = 'SAR',
-  AED = 'AED',
-  USD = 'USD'
 }
+
+
+export enum Country {
+  EG = 'EG',
+  SA = 'SA',
+}
+

@@ -11,15 +11,19 @@ export class RedisCacheProvider implements ICacheProvider {
       port: env.redis.port,
       password: env.redis.password,
       lazyConnect: true,
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: null,
+      retryStrategy(times) {
+        const delay = Math.min(times * 50, 20);
+        return delay;
+      },
     });
 
     this.client.on('error', (err: any) => {
       console.log('Redis Error:', err.message);
     });
 
-    this.client.connect().catch((err: any) => {
-      console.error('Redis Connect Error:', err);
+    this.client.on('connect', () => {
+      console.log('🚀 Redis Connected Successfully!');
     });
   }
 
