@@ -1,4 +1,6 @@
 import { PermissionDeniedError } from '../../../lib/auth/error.js';
+import { BranchNotFoundError } from '../../branch/errors.js';
+import { findBranchByIdWithRestaurant } from '../../branch/repository/branch.repo.js';
 import { RestaurantNotFoundError } from '../../restaurant/errors.js';
 import { findRestaurantById } from '../../restaurant/repository/restaurant.repo.js';
 import { SystemRole } from '../../users/enums.js';
@@ -54,7 +56,36 @@ export class ProductService {
   };
 
   findByBranch = async (branchId: number) => {
-    return await findProductsByBranch(branchId);
+    const branch = await findBranchByIdWithRestaurant(branchId);
+    if (!branch) throw BranchNotFoundError;
+    const products = await findProductsByBranch(branchId);
+    const categoriesMap: Record<number, any> = {};
+    products.forEach((row) => {
+      const categoryId = row.category_id || 0;
+      const categoryName = row.category_name || 'Others';
+
+      if (!categoriesMap[categoryId]) {
+        categoriesMap[categoryId] = {
+          id: categoryId,
+          name: categoryName,
+          products: [],
+        };
+      }
+
+      categoriesMap[categoryId].products.push({
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        image_url: row.image_url,
+        price: row.price,
+        stock: row.stock,
+        is_available: row.is_available,
+      });
+    });
+    return {
+      ...branch,
+      menu: Object.values(categoriesMap),
+    };
   };
 
   findById = async (id: number) => {
@@ -110,5 +141,4 @@ export class ProductService {
 
     return { product: updatedProduct, branchDetails };
   };
-
 }

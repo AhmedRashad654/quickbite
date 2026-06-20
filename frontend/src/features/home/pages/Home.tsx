@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import HomeFooter from "../components/HomeFooter";
@@ -8,6 +9,7 @@ import NearbyRestaurantsSection from "../components/NearbyRestaurantsSection";
 import { useCurrentLocation, useNearbyRestaurants } from "../hooks/home-hooks";
 
 const Home = () => {
+  const navigate = useNavigate();
   const {
     location,
     permissionStatus,
@@ -19,12 +21,15 @@ const Home = () => {
     setHasAutoRequested,
   } = useCurrentLocation();
 
-  const nearbyRestaurants = useNearbyRestaurants(
+  const { data: restaurantnearBy, isLoading } = useNearbyRestaurants(
     location ? { lat: location.lat, lng: location.lng } : null,
   );
-
   useEffect(() => {
-    if (location?.source !== "manual-zone" && permissionStatus === "idle" && !hasAutoRequested) {
+    if (
+      location?.source !== "manual-zone" &&
+      permissionStatus === "idle" &&
+      !hasAutoRequested
+    ) {
       setHasAutoRequested(true);
       requestCurrentLocation();
     }
@@ -36,8 +41,8 @@ const Home = () => {
     setHasAutoRequested,
   ]);
 
-  const branches = nearbyRestaurants.data?.branches ?? [];
-  const isFallback = nearbyRestaurants.data?.isFallback ?? false;
+  const branches = restaurantnearBy?.branches ?? [];
+  const isFallback = restaurantnearBy?.isFallback ?? false;
 
   return (
     <main className="min-h-dvh bg-background">
@@ -72,6 +77,10 @@ const Home = () => {
             setLocation(nextLocation);
             setPermissionStatus("granted");
           }}
+          onSelectAddress={(nextLocation) => {
+            setLocation(nextLocation);
+            setPermissionStatus("granted");
+          }}
           onClearLocation={() => {
             clearLocation();
             setPermissionStatus("idle");
@@ -80,8 +89,9 @@ const Home = () => {
         <NearbyRestaurantsSection
           branches={branches}
           isFallback={isFallback}
-          isLoading={nearbyRestaurants.isLoading}
+          isLoading={isLoading}
           location={location}
+          onBranchClick={(branchId) => navigate(`/menu/${branchId}`)}
         />
 
         <HowItWorksSection />

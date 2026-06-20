@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { CustomerLocation } from "@/store/location-store";
 import AreaSelect from "./AreaSelect";
+import CustomerAdressSelect from "./CustomerAdressSelect";
 
 type LocationBarProps = {
   location: CustomerLocation | null;
@@ -14,6 +15,7 @@ type LocationBarProps = {
     | "unavailable";
   onUseCurrentLocation: () => void;
   onSelectZone: (location: CustomerLocation) => void;
+  onSelectAddress: (location: CustomerLocation) => void;
   onClearLocation: () => void;
 };
 
@@ -22,11 +24,12 @@ const LocationBar = ({
   permissionStatus,
   onUseCurrentLocation,
   onSelectZone,
+  onSelectAddress,
   onClearLocation,
 }: LocationBarProps) => {
   const isRequesting = permissionStatus === "requesting";
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 xl:flex-row xl:items-center sm:justify-between">
       <div className="min-w-0">
         <div className="flex items-center gap-2 text-sm font-medium">
           <MapPin className="size-4 text-muted-foreground" />
@@ -44,8 +47,9 @@ const LocationBar = ({
         </p>
       </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center">
         <AreaSelect location={location} onSelect={onSelectZone} />
+        <CustomerAdressSelect location={location} onSelect={onSelectAddress} />
         <Button
           type="button"
           variant="outline"

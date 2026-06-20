@@ -1,16 +1,14 @@
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
-  await knex.raw(`
-        CREATE TYPE country_enum AS ENUM('EG', 'SA');
-        
+  await knex.raw(`        
         CREATE TABLE restaurants (
             id SERIAL PRIMARY KEY,
             owner_id INTEGER NOT NULL,
             name text NOT NULL,
             logo_url TEXT,
             status TEXT NOT NULL CHECK(status IN ('active','suspended','disabled','pending')) DEFAULT 'pending',
-            primary_country country_enum NOT NULL ,
+            primary_country TEXT NOT NULL CHECK(type IN ('EG','SA')),
             created_at TIMESTAMP NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
             status_updated_at TIMESTAMP NOT NULL DEFAULT NOW(),

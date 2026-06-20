@@ -15,7 +15,6 @@ export const useCurrentLocation = () => {
     (state) => state.setHasAutoRequested,
   );
 
-  console.log(permissionStatus, "perr");
   const setPermissionStatus = useLocationStore(
     (state) => state.setPermissionStatus,
   );
@@ -40,6 +39,8 @@ export const useCurrentLocation = () => {
           lng: position.coords.longitude,
           label: "Current location",
           source: "browser",
+          idCustomerAddress:null,
+          countryCode:null
         });
         setPermissionStatus("granted");
       },

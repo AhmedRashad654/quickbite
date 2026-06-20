@@ -7,7 +7,8 @@ export type CustomerLocation = {
   lat: number;
   lng: number;
   label: string;
-  countryCode?: string;
+  countryCode: string | null;
+  idCustomerAddress?: number | null;
   source: LocationSource;
 };
 

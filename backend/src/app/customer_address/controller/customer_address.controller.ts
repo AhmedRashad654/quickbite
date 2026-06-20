@@ -12,25 +12,25 @@ export class CustomerAddressController {
 
   getAll = async (req: Request, res: Response) => {
     const addresses = await this.customerAddressService.getByUserId(req.user?.userId!);
-    sendSuccess(res, { data: addresses });
+    sendSuccess(res, addresses);
   };
 
   create = async (req: Request, res: Response) => {
     const data = await validateBody(CreateAddressDTO, req.body);
     const address = await this.customerAddressService.create(req.user?.userId!, data);
-    sendSuccess(res, { message: 'Address added', address }, 201);
+    sendSuccess(res, address, 'Address added successfully', 201);
   };
 
   update = async (req: Request, res: Response) => {
     const addressId = Number(req.params.addressId);
     const data = await validateBody(UpdateAddressDTO, req.body);
     const address = await this.customerAddressService.update(req.user?.userId!, addressId, data);
-    sendSuccess(res, { message: 'Address updated', address });
+    sendSuccess(res, address, 'Address updated');
   };
 
   remove = async (req: Request, res: Response) => {
     const addressId = Number(req.params.addressId);
     await this.customerAddressService.remove(req.user?.userId!, addressId);
-    sendSuccess(res, { message: 'Address deleted' });
+    sendSuccess(res, undefined, 'Address deleted', 200);
   };
 }

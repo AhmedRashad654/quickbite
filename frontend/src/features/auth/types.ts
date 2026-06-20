@@ -47,14 +47,12 @@ export type ResetPasswordPayload = {
 };
 
 export type AuthResponse = {
-  message: string;
   accessToken: string;
   user: AuthUser;
   restaurant?: unknown;
 };
 
 export type RefreshResponse = {
-  message: string;
   accessToken: string;
 };
 

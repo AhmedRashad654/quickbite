@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@/api/api-helper";
+import { type ApiResponse } from "@/api/api-helper";
 import type {
   AuthResponse,
   AuthUser,
@@ -10,7 +10,9 @@ import type {
 } from "../types";
 import { apiClient } from "@/api/axios-client";
 
-export const unwrap = <T>(response: { data: ApiResponse<T> }) => response.data.data;
+export const unwrap = <T>(response: { data: ApiResponse<T> }) => response.data;
+
+export const unwrapResponse = <T>(response: { data: ApiResponse<T> }) => response.data.data;
 
 export const login = async (payload: LoginPayload) => {
   const response = await apiClient.post<ApiResponse<AuthResponse>>(
@@ -66,5 +68,6 @@ export const resetPassword = async (payload: ResetPasswordPayload) => {
     "/auth/reset-password",
     payload,
   );
+
   return unwrap(response);
 };

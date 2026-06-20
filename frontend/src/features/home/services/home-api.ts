@@ -4,7 +4,7 @@ import type {
   NearbyRestaurantsParams,
   NearbyRestaurantsResponse,
 } from "../types";
-import { unwrap } from "@/features/auth/services/auth-api";
+import {unwrapResponse } from "@/features/auth/services/auth-api";
 
 export const getNearbyRestaurants = async ({
   lat,
@@ -16,5 +16,5 @@ export const getNearbyRestaurants = async ({
       params: { lat, lng },
     },
   );
-  return unwrap(response);
+  return unwrapResponse(response);
 };

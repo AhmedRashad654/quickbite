@@ -19,7 +19,7 @@ export class ProductController {
       req.user?.role! as SystemRole,
       data,
     );
-    sendSuccess(res, { message: 'Product created', product }, 201);
+    sendSuccess(res, product, 'Product created', 201);
   };
 
   findByRestaurant = async (req: Request, res: Response) => {
@@ -28,17 +28,17 @@ export class ProductController {
       req.user?.userId!,
       req.user?.role! as SystemRole,
     );
-    sendSuccess(res, { data: results });
+    sendSuccess(res, results);
   };
 
   findCategories = async (req: Request, res: Response) => {
     const results = await this.productService.findCategories(Number(req.params.restaurantId));
-    sendSuccess(res, { data: results });
+    sendSuccess(res, results);
   };
 
   findByBranch = async (req: Request, res: Response) => {
     const results = await this.productService.findByBranch(Number(req.params.branchId));
-    sendSuccess(res, { data: results });
+    sendSuccess(res, results);
   };
 
   findById = async (req: Request, res: Response) => {
@@ -56,6 +56,6 @@ export class ProductController {
       data,
       branchId,
     );
-    sendSuccess(res, { message: 'Product updated', ...result });
+    sendSuccess(res, result, 'Product updated');
   };
 }

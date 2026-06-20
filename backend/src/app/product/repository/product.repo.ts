@@ -1,6 +1,6 @@
-import { db } from "../../../lib/knex/knex.js";
-import { NoFieldsToUpdateError } from "../errors.js";
-import { Product } from "../type.js";
+import { db } from '../../../lib/knex/knex.js';
+import { NoFieldsToUpdateError } from '../errors.js';
+import { Product } from '../type.js';
 
 const PRODUCT_COLUMNS = [
   'id',
@@ -28,11 +28,7 @@ export async function createProduct(data: Partial<Product>): Promise<Product> {
 }
 
 export async function findProductById(id: number): Promise<Product | null> {
-  const row = await db('products')
-    .select(PRODUCT_COLUMNS)
-    .where('id', id)
-    .whereNull('deleted_at')
-    .first();
+  const row = await db('products').select(PRODUCT_COLUMNS).where('id', id).whereNull('deleted_at').first();
   return row || null;
 }
 
@@ -61,7 +57,8 @@ export async function findProductsByBranch(branchId: number) {
       'pbd.price',
       'pbd.stock',
       'pbd.is_available',
-    );
+    )
+    .orderBy('pc.id');
   return rows;
 }
 
@@ -72,16 +69,10 @@ export async function updateProduct(id: number, data: Partial<Product>): Promise
   if (data.image_url !== undefined) updateData.image_url = data.image_url;
   if (data.category_id !== undefined) updateData.category_id = data.category_id;
 
-  if(Object.keys(updateData).length === 0) {
+  if (Object.keys(updateData).length === 0) {
     throw NoFieldsToUpdateError;
   }
 
-  const [row] = await db('products')
-    .where('id', id)
-    .update(updateData)
-    .returning(PRODUCT_COLUMNS);
+  const [row] = await db('products').where('id', id).update(updateData).returning(PRODUCT_COLUMNS);
   return row;
 }
-
-
-

@@ -19,7 +19,7 @@ export class BranchController {
       req.user?.role! as SystemRole,
       data,
     );
-    sendSuccess(res, { message: 'Branch added', branch }, 201);
+    sendSuccess(res, branch,'Branch added', 201);
   };
 
   findNearby = async (req: Request, res: Response) => {

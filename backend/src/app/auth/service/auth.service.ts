@@ -106,7 +106,6 @@ export class AuthService {
     const refreshToken = createRefreshToken(payload);
 
     return {
-      message: 'successfully registered user',
       accessToken,
       refreshToken,
       user: {
@@ -157,7 +156,6 @@ export class AuthService {
     const refreshToken = createRefreshToken(payload);
 
     return {
-      message: 'Login successful',
       accessToken,
       refreshToken,
       user: {

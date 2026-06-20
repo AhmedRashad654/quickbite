@@ -12,6 +12,7 @@ import type { NearbyBranch } from "../types";
 type RestaurantCardProps = {
   branch: NearbyBranch;
   isFallback: boolean;
+  onClick?: () => void;
 };
 
 const formatDistance = (distance?: number | string) => {
@@ -27,11 +28,15 @@ const formatDistance = (distance?: number | string) => {
   return `${(distanceNumber / 1000).toFixed(1)} km away`;
 };
 
-const RestaurantCard = ({ branch, isFallback }: RestaurantCardProps) => {
+const RestaurantCard = ({ branch, isFallback, onClick }: RestaurantCardProps) => {
   const distance = formatDistance(branch.distance_meters);
 
   return (
-    <Card className="rounded-lg" size="sm">
+    <Card
+      className={`rounded-lg ${onClick ? "cursor-pointer transition-colors hover:bg-accent/50" : ""}`}
+      size="sm"
+      onClick={onClick}
+    >
       <CardHeader className="gap-3">
         <div className="flex items-start gap-3 relative">
           <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">

@@ -23,7 +23,7 @@ export class AuthController {
       maxAge: toMs(7, 'd'),
       path: '/api/v1/auth/refresh',
     });
-    sendSuccess(res, result, 201);
+    sendSuccess(res, result, 'successfully registered user', 201);
   };
 
   login = async (req: Request, res: Response) => {
@@ -35,31 +35,24 @@ export class AuthController {
       maxAge: toMs(7, 'd'),
       path: '/api/v1/auth/refresh',
     });
-    sendSuccess(res, result);
+    sendSuccess(res, result, 'Login successful');
   };
 
   forgetPassword = async (req: Request, res: Response) => {
     const data = await validateBody(ForgetPasswordDTO, req.body);
     await this.authService.forgetPassword(data);
-    sendSuccess(res, {
-      message: 'Email Sent with OTP',
-    });
+    sendSuccess(res, undefined, 'Email Sent with OTP');
   };
 
   resetPassword = async (req: Request, res: Response) => {
     const data = await validateBody(ResetPasswordDTO, req.body);
     await this.authService.resetPassword(data);
-    sendSuccess(res, {
-      message: 'Password reset successfully, please login again',
-    });
+    sendSuccess(res, undefined,'Password reset successfully, please login again');
   };
 
   refresh = async (req: Request, res: Response) => {
     const result = await this.authService.refresh(req.cookies.refresh_token);
-    sendSuccess(res, {
-      message: 'success',
-      ...result,
-    });
+    sendSuccess(res, result, 'success');
   };
 
   logout = async (_req: Request, res: Response) => {
@@ -68,8 +61,6 @@ export class AuthController {
       secure: env.nodeEnv === 'production',
       path: '/api/v1/auth/refresh',
     });
-    sendSuccess(res, {
-      message: 'Logged out successfully',
-    });
+    sendSuccess(res, undefined,'Logged out successfully');
   };
 }

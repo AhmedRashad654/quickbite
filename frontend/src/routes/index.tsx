@@ -1,3 +1,4 @@
+import AppLayout from "@/layouts/AppLayout";
 import AuthLayout from "@/layouts/AuthLayout";
 import { lazy } from "react";
 import {
@@ -14,6 +15,9 @@ const ForgotPassword = lazy(
 );
 const ResetPassword = lazy(() => import("@/features/auth/pages/ResetPassword"));
 const Home = lazy(() => import("@/features/home/pages/Home"));
+const Profile = lazy(() => import("@/features/profile/pages/Profile"));
+const MenuPage = lazy(() => import("@/features/menu/pages/MenuPage"));
+const Checkout = lazy(() => import("@/features/checkout/pages/Checkout"));
 
 const Routes = () => {
   const AuthRoutes = [
@@ -53,7 +57,17 @@ const Routes = () => {
   const CustomerRoutes = [
     {
       element: <ProtectedRoute />,
-      children: [{ path: "/", element: <Home /> }],
+      children: [
+        {
+          element: <AppLayout />,
+          children: [
+            { path: "/", element: <Home /> },
+            { path: "/profile", element: <Profile /> },
+            { path: "/menu/:branchId", element: <MenuPage /> },
+            { path: "/checkout", element: <Checkout /> },
+          ],
+        },
+      ],
     },
   ];
   const errorRoute = {

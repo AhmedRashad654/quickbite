@@ -1,8 +1,9 @@
 import axios from "axios";
 
-export type ApiResponse<T> = {
+export type ApiResponse<T = void> = {
   success: boolean;
   data: T;
+  message?: string;
   meta?: unknown;
 };
 
@@ -18,7 +19,9 @@ export class ApiClientError extends Error {
 
 export const toApiError = (error: unknown) => {
   if (!axios.isAxiosError(error)) {
-    return error instanceof Error ? error : new ApiClientError("Something went wrong");
+    return error instanceof Error
+      ? error
+      : new ApiClientError("Something went wrong");
   }
 
   const responseData = error.response?.data as

@@ -6,7 +6,7 @@ export const client = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
       if (query.meta?.errorMessage === false) return;
-      const apiError = toApiError(error); 
+      const apiError = toApiError(error);
       toast.error(`Error: ${apiError.message}`);
     },
   }),
@@ -16,9 +16,20 @@ export const client = new QueryClient({
       if (mutation.meta?.disableSuccessToast) return;
       if (mutation.meta?.successMessage) {
         toast.success(mutation.meta.successMessage as string);
-      } else {
-        toast.success("Operation completed successfully!");
+        return;
       }
+
+      if (
+        _data &&
+        typeof _data === "object" &&
+        "message" in _data &&
+        typeof _data.message === "string" &&
+        _data.message
+      ) {
+        toast.success(_data.message);
+        return;
+      }
+      toast.success("Operation completed successfully!");
     },
 
     onError: (error) => {

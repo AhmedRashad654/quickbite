@@ -1,4 +1,4 @@
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import { JwtPayloadType } from '../../../lib/types/jwtPayload.js';
 import { CreateOrderDTO } from '../dto/order.dto.js';
 import { RestaurantStatus } from '../../restaurant/enums.js';
@@ -24,12 +24,13 @@ import { OrderDetailResponseDTO, OrderResponseDTO, OrderSummaryResponseDTO } fro
 import { Server as IoServer } from 'socket.io';
 import { container } from '../../../lib/di/container.js';
 import { TOKENS } from '../../../lib/di/tokens.js';
+import { PaymentService } from '../../payment/service/payment.service.js';
 
 const SERVICE_FEE_MINOR = 1000;
 
 @injectable()
 export class OrderService {
-  constructor() {}
+  constructor(@inject(TOKENS.PaymentService) private readonly paymentService: PaymentService) {}
 
   private get io(): IoServer {
     return container.resolve<IoServer>(TOKENS.WsServer);
@@ -120,8 +121,12 @@ export class OrderService {
     let paymentInfo;
     if (body.paymentMethod === PaymentMethod.ONLINE) {
       try {
-        // const result = await this.paymentService.initOnlinePayment(order);
-        // paymentInfo = { redirectUrl: result.dto.redirectUrl /* ... */ };
+        const result = await this.paymentService.initOnlinePayment(order);
+        paymentInfo = {
+          providerSessionId: result.session.provider_session_id,
+          redirectUrl: result.session.redirect_url,
+          expiresAt: result.expiresAt,
+        };
       } catch (err) {
         await updateOrderStatus(publicId, OrderStatus.CANCELLED, 'cancelled_at');
         this.releaseStockSafe(branch.branch.id, body.items);
@@ -142,7 +147,6 @@ export class OrderService {
     const items = await findItemsByOrderIds([order.id]);
     return OrderDetailResponseDTO.from(order, items);
   }
-
 
   // ── private helpers ──────────────────────────────────────────────────
   private buildOrderLineDrafts(

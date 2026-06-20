@@ -3,6 +3,7 @@ import { db } from '../../../lib/knex/knex.js';
 import { Branch, BranchWithRestaurant } from '../type.js';
 import { NoFieldsToUpdateError } from '../errors.js';
 import { env } from '../../../lib/config/env.js';
+import { Restaurant } from '../../restaurant/type.js';
 
 const BRANCH_COLUMNS = [
   'id',
@@ -16,6 +17,7 @@ const BRANCH_COLUMNS = [
   'opens_at',
   'closes_at',
   'accept_orders',
+  'delivery_fee',
   'currency',
   'commission',
   'created_at',
@@ -50,6 +52,31 @@ export async function findBranchesByRestaurant(restaurantId: number): Promise<Br
 
 export async function findBranchById(id: number): Promise<Branch | null> {
   const row = await db('restaurant_branches').select(BRANCH_COLUMNS).where('id', id).first();
+  return row || null;
+}
+
+export async function findBranchByIdWithRestaurant(branchId: number): Promise<Partial<Branch> & Partial<Restaurant>> {
+  const row = await db('restaurant_branches as rb')
+    .join('restaurants as r', 'rb.restaurant_id', 'r.id')
+    .where('rb.id', branchId)
+    .andWhere('rb.is_active', true)
+    .andWhere('r.status', 'active')
+    .select(
+      'rb.id as branch_id',
+      'rb.label as branch_name',
+      'rb.address_text',
+      'rb.country_code',
+      'rb.is_active',
+      'rb.opens_at',
+      'rb.closes_at',
+      'rb.accept_orders',
+      'rb.currency',
+      'rb.delivery_fee',
+      'r.name as restaurant_name',
+      'r.logo_url',
+      'r.status as status_restaurant',
+    )
+    .first();
   return row || null;
 }
 

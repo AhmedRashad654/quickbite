@@ -17,8 +17,7 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: login,
-    meta: { successMessage: "Welcome back" },
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       setSession(data.accessToken, data.user);
     },
   });
@@ -30,7 +29,7 @@ export const useRegister = () => {
   return useMutation({
     mutationFn: register,
     meta: { successMessage: "Account created" },
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       setSession(data.accessToken, data.user);
     },
   });
@@ -56,20 +55,18 @@ export const useForgotPassword = () => {
     onSuccess: () => {
       resetKey();
     },
-    meta: { successMessage: "Password reset code sent" },
   });
 };
 
 export const useResetPassword = () => {
   return useMutation({
     mutationFn: resetPassword,
-    meta: { successMessage: "Password updated" },
   });
 };
 
 export const useMe = (enabled = true) => {
   const setUser = useAuthStore((state) => state.setUser);
-  const query = useQuery({
+  const { data } = useQuery({
     queryKey: ["auth", "me"],
     queryFn: getMe,
     enabled,
@@ -77,10 +74,10 @@ export const useMe = (enabled = true) => {
   });
 
   useEffect(() => {
-    if (query.data) {
-      setUser(query.data);
+    if (data) {
+      setUser(data.data);
     }
-  }, [query.data, setUser]);
+  }, [data, setUser]);
 
-  return query;
+  return data;
 };

@@ -20,11 +20,11 @@ const AuthBootstrap = ({ children }: AuthBootstrapProps) => {
         const refreshed = await refreshToken();
         if (!isMounted) return;
 
-        setAccessToken(refreshed.accessToken);
+        setAccessToken(refreshed.data.accessToken);
         const user = await getMe();
         if (!isMounted) return;
 
-        setUser(user);
+        setUser(user.data);
       } catch {
         if (isMounted) {
           clearSession();

@@ -46,7 +46,7 @@ export class OrderSummaryResponseDTO {
 }
 
 export interface OrderResponsePaymentInfo {
-  sessionId: string;
+  sessionId?: string;
   providerSessionId: string;
   redirectUrl: string;
   expiresAt: string;

@@ -18,6 +18,6 @@ export class UsersController {
   updateMe = async (req: Request, res: Response) => {
     const data = await validateBody(UpdateUserDTO, req.body);
     const user = await this.userService.updateProfile(req.user?.userId!, data);
-    sendSuccess(res, { message: 'Profile updated', user });
+    sendSuccess(res, user,'Profile updated');
   };
 }

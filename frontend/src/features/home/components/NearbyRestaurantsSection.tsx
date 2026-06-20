@@ -9,6 +9,7 @@ type NearbyRestaurantsSectionProps = {
   isFallback: boolean;
   isLoading: boolean;
   location?: CustomerLocation | null;
+  onBranchClick?: (branchId: number) => void;
 };
 
 const NearbyRestaurantsSection = ({
@@ -16,6 +17,7 @@ const NearbyRestaurantsSection = ({
   isFallback,
   isLoading,
   location,
+  onBranchClick,
 }: NearbyRestaurantsSectionProps) => {
   const hasBranches = branches.length > 0;
 
@@ -82,6 +84,7 @@ const NearbyRestaurantsSection = ({
               key={branch.id}
               branch={branch}
               isFallback={isFallback}
+              onClick={onBranchClick ? () => onBranchClick(branch.id) : undefined}
             />
           ))}
         </div>

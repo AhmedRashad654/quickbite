@@ -39,8 +39,9 @@ apiClient.interceptors.response.use(
 
       try {
         const response = await refreshToken();
-        const accessToken = response.accessToken;
-
+        console.log(response, "tttttttttttttttttttttttttt");
+        const accessToken = response.data.accessToken;
+        console.log(accessToken, "yyy");
         useAuthStore.getState().setAccessToken(accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 

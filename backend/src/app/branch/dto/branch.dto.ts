@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsInt, Min, IsEnum, Max, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, Min, IsEnum, Max, IsOptional, IsBoolean } from 'class-validator';
 import { Country, Currency } from '../enums.js';
 
 export class CreateBranchDTO {

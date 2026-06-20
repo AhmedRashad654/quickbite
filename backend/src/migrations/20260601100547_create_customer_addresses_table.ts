@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
             id SERIAL PRIMARY KEY,
             user_id INTEGER NOT NULL ,
             label TEXT NOT NULL,
-            country TEXT NOT NULL, 
+            country TEXT NOT NULL CHECK(type IN ('EG','SA')), 
             city TEXT NOT NULL, 
             street TEXT NOT NULL, 
             building TEXT,

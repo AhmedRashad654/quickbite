@@ -13,7 +13,7 @@ export class OrderController {
   placeOrder = async (req: Request, res: Response) => {
     const data = await validateBody(CreateOrderDTO, req.body);
     const result = await this.orderService.placeOrder(req.user!, data);
-    sendSuccess(res, result, 201);
+    sendSuccess(res, result, undefined, 201);
   };
 
   getOrder = async (req: Request, res: Response) => {

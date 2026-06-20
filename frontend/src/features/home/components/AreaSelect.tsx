@@ -35,6 +35,7 @@ const AreaSelect = ({ location, onSelect }: AreaSelectProps) => {
           lat: zone.lat,
           lng: zone.lng,
           label: zone.name,
+          idCustomerAddress: null,
           countryCode,
           source: "manual-zone",
         });
