@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { ForgetPasswordDTO, LoginDTO, RegisterDTO, ResetPasswordDTO } from '../dto/auth.dto.js';
 import { AuthService } from '../service/auth.service.js';
-import { env } from '../../../lib/config/env.js';
 import { validateBody } from '../../../lib/validation/validate.js';
 import { toMs } from '../../../lib/utils/time.js';
 import { inject, injectable } from 'tsyringe';
 import { TOKENS } from '../../../lib/di/tokens.js';
 import { sendSuccess } from '../../../lib/http/response.js';
+import { env } from '../../../lib/config/env.js';
 
 @injectable()
 export class AuthController {
@@ -47,7 +47,7 @@ export class AuthController {
   resetPassword = async (req: Request, res: Response) => {
     const data = await validateBody(ResetPasswordDTO, req.body);
     await this.authService.resetPassword(data);
-    sendSuccess(res, undefined,'Password reset successfully, please login again');
+    sendSuccess(res, undefined, 'Password reset successfully, please login again');
   };
 
   refresh = async (req: Request, res: Response) => {
@@ -61,6 +61,6 @@ export class AuthController {
       secure: env.nodeEnv === 'production',
       path: '/api/v1/auth/refresh',
     });
-    sendSuccess(res, undefined,'Logged out successfully');
+    sendSuccess(res, undefined, 'Logged out successfully');
   };
 }

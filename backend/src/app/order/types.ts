@@ -15,7 +15,7 @@ export interface Order {
   branch_lat: number;
   branch_lng: number;
   status: OrderStatus;
-  order_type:OrderType;
+  order_type: OrderType;
   subtotal: number;
   delivery_fee: number;
   service_fee: number;
@@ -59,7 +59,7 @@ export interface CreateOrderInput {
   branch_lat: number;
   branch_lng: number;
   status: OrderStatus;
-  order_type:OrderType;
+  order_type: OrderType;
   subtotal: number;
   delivery_fee: number;
   service_fee: number;
@@ -113,4 +113,13 @@ export interface UnavailableItem {
   product_id: number;
   requested: number;
   available: number;
+}
+
+export interface ListResult<T> {
+  data: T[];
+  meta: {
+    nextCursor: string | null;
+    hasMore: boolean;
+    count: number;
+  };
 }

@@ -16,17 +16,21 @@ import { BranchProduct, Order, OrderItem, OrderLineDraft, UnavailableItem } from
 import { multiplyMinor, sumMinor } from '../../../lib/utils/money.js';
 import { randomUUID } from 'crypto';
 import { db } from '../../../lib/knex/knex.js';
-import { createOrder, findOrderByPublicId, updateOrderStatus } from '../repository/order.repo.js';
+import { createOrder, findOrderByPublicId, findOrdersByCustomer, updateOrderStatus } from '../repository/order.repo.js';
 import { OrderStatus, OrderType, PaymentMethod } from '../enums.js';
 import { CustomerAddress } from '../../customer_address/type.js';
-import { bulkInsertItems, findItemsByOrderIds } from '../repository/order-item.repo.js';
+import { bulkInsertItems, countItemsByOrderIds, findItemsByOrderIds } from '../repository/order-item.repo.js';
 import { OrderDetailResponseDTO, OrderResponseDTO, OrderSummaryResponseDTO } from '../dto/order.response.dto.js';
 import { Server as IoServer } from 'socket.io';
 import { container } from '../../../lib/di/container.js';
 import { TOKENS } from '../../../lib/di/tokens.js';
 import { PaymentService } from '../../payment/service/payment.service.js';
-import { env } from '../../../lib/config/env.js';
 import { AppError } from '../../../lib/error/AppError.js';
+import { SystemRole } from '../../users/enums.js';
+import { PermissionDeniedError } from '../../../lib/auth/error.js';
+import { PaginationParams } from '../../../lib/http/pagination/cursor-pagination.js';
+import { isBranchOpen } from '../../../lib/utils/branchTime.js';
+import { env } from '../../../lib/config/env.js';
 
 const SERVICE_FEE_MINOR = 1000;
 
@@ -41,7 +45,7 @@ export class OrderService {
   async placeOrder(user: JwtPayloadType, body: CreateOrderDTO) {
     const branch = await findBranchWithRestaurant(body.branch_id);
     if (!branch) throw BranchNotFoundError;
-    if (!branch?.is_active || !branch?.accept_orders || branch.restaurant_status !== RestaurantStatus.ACTIVE) {
+    if (branch.restaurant_status !== RestaurantStatus.ACTIVE || !isBranchOpen(branch)) {
       throw BranchNotAcceptingOrdersError;
     }
 
@@ -57,7 +61,10 @@ export class OrderService {
     const products = await getProductsByBranchAndIds(body.branch_id, productIds);
     const orderLineDrafts = this.buildOrderLineDrafts(body.items, products);
     const subtotal = sumMinor(orderLineDrafts.map((l) => l.line_total));
-    const total = body.order_type === OrderType.DELIVERY ? subtotal + branch.delivery_fee + SERVICE_FEE_MINOR : subtotal + SERVICE_FEE_MINOR;
+    const total =
+      body.order_type === OrderType.DELIVERY
+        ? subtotal + branch.delivery_fee + SERVICE_FEE_MINOR
+        : subtotal + SERVICE_FEE_MINOR;
 
     const publicId = randomUUID();
     const trx = await db.transaction();
@@ -134,15 +141,32 @@ export class OrderService {
     return OrderResponseDTO.from(order, items, paymentInfo);
   }
 
-  async getOrder(publicId: string): Promise<OrderDetailResponseDTO> {
+  async getOrder(publicId: string, user: JwtPayloadType): Promise<OrderDetailResponseDTO> {
     const order = await findOrderByPublicId(publicId);
     if (!order) throw OrderNotFoundError;
+    this.assertReadAccess(user, order);
     const items = await findItemsByOrderIds([order.id]);
     return OrderDetailResponseDTO.from(order, items);
   }
 
+  async listCustomerOrders(actor: Partial<JwtPayloadType>, year: number, pagination: PaginationParams) {
+    const yearStart = new Date(Date.UTC(year, 0, 1));
+    const yearEnd = new Date(Date.UTC(year + 1, 0, 1));
+    console.log(pagination)
+    const result = await findOrdersByCustomer({ customerId: actor.userId!, yearStart, yearEnd }, pagination);
+    console.log(result, 'result 654');
+    const counts = await countItemsByOrderIds(result.data.map((o) => o.id));
+    return {
+      data: result.data.map((o) => OrderSummaryResponseDTO.from(o, counts.get(o.id) ?? 0)),
+      meta: result.meta,
+    };
+  }
+
   // ── private helpers ──────────────────────────────────────────────────
-  private buildOrderLineDrafts(requested: Array<{ product_id: number; quantity: number }>, products: BranchProduct[]): OrderLineDraft[] {
+  private buildOrderLineDrafts(
+    requested: Array<{ product_id: number; quantity: number }>,
+    products: BranchProduct[],
+  ): OrderLineDraft[] {
     const byProduct = new Map<number, BranchProduct>();
     for (const p of products) byProduct.set(Number(p.product_id), p);
 
@@ -172,7 +196,10 @@ export class OrderService {
     return drafts;
   }
 
-  private async releaseStockSafe(branchId: number, items: Array<{ product_id: number; quantity: number }>): Promise<void> {
+  private async releaseStockSafe(
+    branchId: number,
+    items: Array<{ product_id: number; quantity: number }>,
+  ): Promise<void> {
     for (const it of items) {
       const newStock = it.quantity;
       await updateBranchProductDetails(branchId, it.product_id, { stock: newStock });
@@ -184,7 +211,12 @@ export class OrderService {
     return parts.join(', ');
   }
 
-  private async validateDeliveryZone(branchLat: number, branchLng: number, customerLat: number, customerLng: number): Promise<void> {
+  private async validateDeliveryZone(
+    branchLat: number,
+    branchLng: number,
+    customerLat: number,
+    customerLng: number,
+  ): Promise<void> {
     const radiusMeters = env.delivery.radiusMeters || 5000;
     const result = await db.raw<{ rows: { distance: number }[] }>(
       `
@@ -199,7 +231,31 @@ export class OrderService {
     const distanceMeters = result.rows[0]?.distance;
 
     if (distanceMeters > radiusMeters) {
-      throw new AppError(`The restaurant is outside your delivery radius. Current distance: ${Math.round(distanceMeters / 1000)} km`, 400);
+      throw new AppError(
+        `The restaurant is outside your delivery radius. Current distance: ${Math.round(distanceMeters / 1000)} km`,
+        400,
+      );
     }
+  }
+
+  private assertReadAccess(user: JwtPayloadType, order: Order) {
+    if (user.role === SystemRole.SYSTEM_ADMIN) return;
+    if (Number(user.userId) === Number(order.customer_id)) return;
+
+    if (user.role === SystemRole.RESTAURANT_USER) {
+      const memberships = user.memberships ?? [];
+
+      const currentRestaurantMembership = memberships.find(
+        (m) => Number(m.restaurantId) === Number(order.restaurant_id),
+      );
+
+      if (currentRestaurantMembership) {
+        if (currentRestaurantMembership.restaurantRole === 'owner') return;
+
+        const branchIds = currentRestaurantMembership.branchIds ?? [];
+        if (branchIds.map(Number).includes(Number(order.branch_id))) return;
+      }
+    }
+    throw PermissionDeniedError;
   }
 }

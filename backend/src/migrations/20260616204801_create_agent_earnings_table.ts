@@ -10,7 +10,7 @@ export async function up(knex: Knex): Promise<void> {
             order_id    INT NOT NULL,
             amount      INT NOT NULL,
             currency    TEXT NOT NULL,
-            earned_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+            earned_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             CONSTRAINT uq_agent_earnings_order_id UNIQUE (order_id)
         );
     `);

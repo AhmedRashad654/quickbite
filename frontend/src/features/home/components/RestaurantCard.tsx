@@ -28,7 +28,11 @@ const formatDistance = (distance?: number | string) => {
   return `${(distanceNumber / 1000).toFixed(1)} km away`;
 };
 
-const RestaurantCard = ({ branch, isFallback, onClick }: RestaurantCardProps) => {
+const RestaurantCard = ({
+  branch,
+  isFallback,
+  onClick,
+}: RestaurantCardProps) => {
   const distance = formatDistance(branch.distance_meters);
 
   return (
@@ -41,7 +45,11 @@ const RestaurantCard = ({ branch, isFallback, onClick }: RestaurantCardProps) =>
         <div className="flex items-start gap-3 relative">
           <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
             {branch.logo_url ? (
-              <img src={branch.logo_url} alt="" className="h-full w-full object-cover" />
+              <img
+                src={branch.logo_url}
+                alt=""
+                className="h-full w-full object-cover"
+              />
             ) : (
               <span className="text-base font-semibold">
                 {branch.name.charAt(0).toUpperCase()}
@@ -52,9 +60,12 @@ const RestaurantCard = ({ branch, isFallback, onClick }: RestaurantCardProps) =>
             <CardTitle className="truncate">{branch.name}</CardTitle>
             <CardDescription className="mt-1">{branch.label}</CardDescription>
           </div>
-            <Badge className="absolute right-0" variant={branch.accept_orders ? "secondary" : "outline"}>
-              {branch.accept_orders ? "Open" : "Unavailable"}
-            </Badge>
+          <Badge
+            className="absolute right-0"
+            variant={branch?.is_open ? "secondary" : "outline"}
+          >
+            {branch?.is_open ? "Open" : "Unavailable"}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -73,7 +84,9 @@ const RestaurantCard = ({ branch, isFallback, onClick }: RestaurantCardProps) =>
               {distance}
             </Badge>
           ) : null}
-          {isFallback ? <Badge variant="destructive">Outside delivery area</Badge> : null}
+          {isFallback ? (
+            <Badge variant="destructive">Outside delivery area</Badge>
+          ) : null}
         </div>
       </CardContent>
     </Card>

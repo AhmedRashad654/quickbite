@@ -1,5 +1,5 @@
 import { Link, Outlet } from "react-router-dom";
-import { LogOut, User } from "lucide-react";
+import { LogOut, Package, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/features/auth/hooks/auth-hooks";
 
@@ -15,6 +15,13 @@ const AppLayout = () => {
           </Link>
 
           <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/orders">
+                <Package />
+                Orders
+              </Link>
+            </Button>
+
             <Button variant="ghost" size="sm" asChild>
               <Link to="/profile">
                 <User />

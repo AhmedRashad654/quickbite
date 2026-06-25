@@ -1,9 +1,9 @@
-import { env } from '../../lib/config/env.js';
 import { register } from '../../lib/jobs/job-registry.js';
 import { container } from '../../lib/di/container.js';
 import { AssignmentService } from './service/assignment.service.js';
 import { TOKENS } from '../../lib/di/tokens.js';
 import { logger } from '../../lib/logger/logger.js';
+import { env } from '../../lib/config/env.js';
 
 export function registerAssignmentJobs(): void {
   const everyNSec = `*/${env.delivery.assignmentTickSec} * * * * *`;

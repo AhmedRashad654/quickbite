@@ -31,7 +31,7 @@ export async function findItemsByOrderIds(orderIds: number[], conn: Knex = db): 
   return rows;
 }
 
-export async function countItemsByOrderIds(orderIds: number[], conn: Knex): Promise<Map<number, number>> {
+export async function countItemsByOrderIds(orderIds: number[], conn: Knex = db): Promise<Map<number, number>> {
     const out = new Map<number, number>();
     if (orderIds.length === 0) return out;
     const rows = await conn("order_items")

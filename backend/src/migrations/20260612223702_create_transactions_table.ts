@@ -19,8 +19,8 @@ export async function up(knex: Knex): Promise<void> {
             is_refunded          BOOLEAN NOT NULL DEFAULT FALSE,
             refunded_payment_id  BIGINT NULL,
             idempotency_key      TEXT NULL,
-            created_at           TIMESTAMP NOT NULL DEFAULT NOW(),
-            updated_at           TIMESTAMP NOT NULL DEFAULT NOW(),
+            created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
             CONSTRAINT uq_transactions_idempotency_key UNIQUE (idempotency_key)
         );

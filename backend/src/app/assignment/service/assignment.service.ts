@@ -6,7 +6,6 @@ import {
   findOrderByPublicId,
   findReadyUnassigned,
 } from '../../order/repository/order.repo.js';
-import { env } from '../../../lib/config/env.js';
 import { logger } from '../../../lib/logger/logger.js';
 import { Order } from '../../order/types.js';
 import { TOKENS } from '../../../lib/di/tokens.js';
@@ -23,6 +22,7 @@ import {
 import { DeliveryTaskResponseDTO } from '../../agent/dto/agent.response.dto.js';
 import { db } from '../../../lib/knex/knex.js';
 import { OrderStatusResponseDTO } from '../../order/dto/order.response.dto.js';
+import { env } from '../../../lib/config/env.js';
 
 @injectable()
 export class AssignmentService {

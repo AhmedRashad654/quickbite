@@ -8,8 +8,8 @@ export async function up(knex: Knex): Promise<void> {
             provider_event_id TEXT NOT NULL,
             signature         TEXT NOT NULL,
             payload           JSONB NOT NULL,
-            received_at       TIMESTAMP NOT NULL DEFAULT NOW(),
-            processed_at      TIMESTAMP NULL,
+            received_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            processed_at      TIMESTAMPTZ NULL,
             process_error     TEXT NULL,
 
             CONSTRAINT uq_payment_webhook_events_provider_event_id UNIQUE (provider_id, provider_event_id)

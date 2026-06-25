@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt';
-import { env } from '../../lib/config/env.js';
 import jwt, { SignOptions } from 'jsonwebtoken';
-import crypto from "crypto";
+import crypto from 'crypto';
 import { InvalidToken } from '../../lib/auth/error.js';
 import { JwtPayloadType } from '../../lib/types/jwtPayload.js';
+import { env } from '../../lib/config/env.js';
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);

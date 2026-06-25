@@ -6,8 +6,8 @@ export async function up(knex: Knex): Promise<void> {
             id SERIAL PRIMARY KEY,
             restaurant_id INTEGER NOT NULL,
             name TEXT NOT NULL,
-            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             CONSTRAINT fk_product_categories_restaurant_id FOREIGN KEY (restaurant_id) REFERENCES restaurants(id),
             CONSTRAINT uq_product_categories_restaurant_name UNIQUE (restaurant_id, name)
         );
@@ -19,9 +19,9 @@ export async function up(knex: Knex): Promise<void> {
             image_url TEXT,
             restaurant_id INTEGER NOT NULL,
             category_id INTEGER,
-            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            deleted_at TIMESTAMP,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            deleted_at TIMESTAMPTZ,
             CONSTRAINT fk_products_restaurant_id FOREIGN KEY (restaurant_id) REFERENCES restaurants(id),
             CONSTRAINT fk_products_category_id FOREIGN KEY (category_id) REFERENCES product_categories(id)
         );

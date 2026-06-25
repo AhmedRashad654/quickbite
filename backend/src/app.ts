@@ -12,7 +12,16 @@ export function createApp() {
   app.use(helmet());
   app.use(cors({ origin: true, credentials: true }));
   app.set('query parser', 'extended');
-  app.use(express.json());
+  app.use(
+    express.json({
+      verify: (req: any, _res, buf) => {
+        if (req.originalUrl && req.originalUrl.includes('/webhook/kashier')) {
+          req.rawBody = buf;
+          console.log('[Express BodyParser] Saved rawBody ONLY for Kashier Webhook! ✅');
+        }
+      },
+    }),
+  );
   app.use(cookieParser());
   app.use(correlationId);
   app.use('/api/v1', routes);

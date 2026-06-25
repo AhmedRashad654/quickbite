@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
             restaurant_id BIGINT NOT NULL,
             currency      TEXT NOT NULL,
             balance       INT NOT NULL DEFAULT 0,
-            updated_at    TIMESTAMP NOT NULL DEFAULT NOW(),
+            updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             PRIMARY KEY (restaurant_id, currency)
         );
     `);

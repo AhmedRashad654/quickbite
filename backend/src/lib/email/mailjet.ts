@@ -1,8 +1,8 @@
 import Mailjet from 'node-mailjet';
-import { env } from '../config/env.js';
 import { IEmailProvider } from './email.interface.js';
 import { injectable } from 'tsyringe';
 import { AppError } from '../error/AppError.js';
+import { env } from '../config/env.js';
 
 @injectable()
 export class MailjetEmailProvider implements IEmailProvider {

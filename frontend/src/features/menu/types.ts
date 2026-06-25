@@ -23,6 +23,7 @@ export type BranchMenu = {
   opens_at: string;
   closes_at: string;
   accept_orders: boolean;
+  is_open: boolean;
   currency: string;
   delivery_fee: number;
   restaurant_name: string;

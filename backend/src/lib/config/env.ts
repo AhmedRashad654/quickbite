@@ -1,14 +1,17 @@
 import path from 'path';
 import { config } from 'dotenv';
 import { z } from 'zod';
+import { fileURLToPath } from 'url';
 
-config({ path: path.resolve(process.cwd(), '.env') });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+config({ path: path.resolve(__dirname, '../../../.env') });
+const ROOT_DIR = path.resolve(__dirname, '../../../');
 
 const schema = z.object({
   PORT: z.string(),
   NODE_ENV: z.string(),
-  CORS_ORIGINS: z.string(),
-
   DB_HOST: z.string(),
   DB_PORT: z.string(),
   POSTGRES_USER: z.string(),
@@ -58,7 +61,7 @@ const schema = z.object({
 });
 
 const parsed = schema.parse(process.env);
-
+console.log(parsed, 'parsed');
 export const env = {
   port: Number(parsed.PORT),
   nodeEnv: parsed.NODE_ENV,
@@ -69,7 +72,7 @@ export const env = {
     password: parsed.POSTGRES_PASSWORD,
     name: parsed.POSTGRES_DB,
     poolMax: Number(parsed.DB_POOL_MAX),
-    migrationDirectory: path.resolve(process.env.PWD || process.cwd(), parsed.DB_MIGRATION_DIRECTORY),
+    migrationDirectory: path.resolve(ROOT_DIR, parsed.DB_MIGRATION_DIRECTORY),
     migrationExtension: parsed.DB_MIGRATION_EXTENSION,
   },
   jwt: {
@@ -82,9 +85,6 @@ export const env = {
     host: parsed.REDIS_HOST,
     port: Number(parsed.REDIS_PORT),
     password: parsed.REDIS_PASSWORD,
-  },
-  cors: {
-    origins: parsed.CORS_ORIGINS.split(',').map((url) => url.trim()),
   },
   mailjet: {
     mailjetApiKey: parsed.MAILJET_API_KEY,

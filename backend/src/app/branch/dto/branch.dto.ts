@@ -4,7 +4,7 @@ import { Country, Currency } from '../enums.js';
 export class CreateBranchDTO {
   @IsString()
   @IsEnum(Country)
-  country_code!: string;
+  country_code!: Country;
 
   @IsString()
   @IsNotEmpty()

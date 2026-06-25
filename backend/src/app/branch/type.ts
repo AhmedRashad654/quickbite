@@ -1,9 +1,9 @@
-import { Currency } from './enums.js';
+import { Country, Currency } from './enums.js';
 
 export interface Branch {
   id: number;
   restaurant_id: number;
-  country_code: string;
+  country_code: Country;
   address_text: string;
   label: string;
   lat: number;
@@ -12,7 +12,8 @@ export interface Branch {
   opens_at: string;
   closes_at: string;
   accept_orders: boolean;
-  delivery_fee:number;
+  is_open?: boolean;
+  delivery_fee: number;
   created_at: Date;
   updated_at: Date;
   currency: Currency;

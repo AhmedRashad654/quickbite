@@ -2,12 +2,12 @@ import type { Server as HttpServer } from 'http';
 import { Server as IOServer } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { toMs } from '../utils/time.js';
-import { env } from '../config/env.js';
 import { container } from '../di/container.js';
 import { ICacheProvider } from '../cache/cache.interface.js';
 import { TOKENS } from '../di/tokens.js';
 import { authenticateHandshake, permittedChannels } from './ws-auth.js';
 import { logger } from '../logger/logger.js';
+import { env } from '../config/env.js';
 
 export function attachWsServer(httpServer: HttpServer): IOServer {
   const io = new IOServer(httpServer, {

@@ -1,7 +1,19 @@
 import { Knex } from 'knex';
-import { CreateOrderInput, ListCustomerOrdersFilter, ListRestaurantBranchOrdersFilter, Order } from '../types.js';
+import {
+  CreateOrderInput,
+  ListCustomerOrdersFilter,
+  ListRestaurantBranchOrdersFilter,
+  ListResult,
+  Order,
+} from '../types.js';
 import { OrderStatus } from '../enums.js';
-import { applyCursorPagination, applyFilters, FilterParams, PaginationParams } from '../../../lib/http/pagination/cursor-pagination.js';
+import {
+  applyCursorPagination,
+  applyFilters,
+  buildPaginationResult,
+  FilterParams,
+  PaginationParams,
+} from '../../../lib/http/pagination/cursor-pagination.js';
 import { db } from '../../../lib/knex/knex.js';
 
 export const ORDER_COLUMNS = [
@@ -102,7 +114,12 @@ export async function releaseAssignedOrderToReady(publicId: string, agentId: num
   return updated;
 }
 
-export async function findAgentTasks(agentId: number, statuses: string[] | undefined, limit: number, conn: Knex = db): Promise<Order[]> {
+export async function findAgentTasks(
+  agentId: number,
+  statuses: string[] | undefined,
+  limit: number,
+  conn: Knex = db,
+): Promise<Order[]> {
   let q = conn('orders')
     .select(ORDER_COLUMNS as unknown as string[])
     .where('delivery_agent_id', agentId);
@@ -115,7 +132,12 @@ export async function updateOrderCommission(publicId: string, commission: number
   await conn('orders').where({ public_id: publicId }).update({ commission, updated_at: conn.fn.now() });
 }
 
-export async function updateOrderStatus(publicId: string, status: OrderStatus, stampColumn: string | null, conn: Knex = db): Promise<Order> {
+export async function updateOrderStatus(
+  publicId: string,
+  status: OrderStatus,
+  stampColumn: string | null,
+  conn: Knex = db,
+): Promise<Order> {
   const update: Record<string, unknown> = {
     status,
     updated_at: conn.fn.now(),
@@ -130,15 +152,20 @@ export async function updateOrderStatus(publicId: string, status: OrderStatus, s
   return row;
 }
 
-export async function findOrdersByCustomer(filter: ListCustomerOrdersFilter, pagination: PaginationParams, conn: Knex): Promise<Order[]> {
+export async function findOrdersByCustomer(
+  filter: ListCustomerOrdersFilter,
+  pagination: PaginationParams,
+  conn: Knex = db,
+): Promise<ListResult<Order>> {
   const query = conn('orders')
-    .select(ORDER_COLUMNS as unknown as string[])
+    .select(ORDER_COLUMNS)
     .where('customer_id', filter.customerId)
     .where('created_at', '>=', filter.yearStart)
     .where('created_at', '<', filter.yearEnd);
 
   const rows = await applyCursorPagination(query, pagination);
-  return rows;
+  const result = buildPaginationResult(rows, pagination.limit, pagination.sortBy);
+  return { data: result.data as Order[], meta: result.meta };
 }
 
 export async function findOrdersByRestaurantBranch(

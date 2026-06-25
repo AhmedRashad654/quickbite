@@ -1,10 +1,10 @@
 import { inject, injectable } from 'tsyringe';
 import { ICacheProvider } from '../../../lib/cache/cache.interface.js';
 import { TOKENS } from '../../../lib/di/tokens.js';
-import { env } from '../../../lib/config/env.js';
 import { db } from '../../../lib/knex/knex.js';
 import { OrderStatus } from '../../order/enums.js';
 import { OfflineWhilePickedForbidden } from '../errors.js';
+import { env } from '../../../lib/config/env.js';
 
 @injectable()
 export class PresenceService {

@@ -14,6 +14,7 @@ import {
   updateBranch,
   updateBranchStatus,
 } from '../repository/branch.repo.js';
+import { isBranchOpen } from '../../../lib/utils/branchTime.js';
 
 @injectable()
 export class BranchService {
@@ -24,6 +25,19 @@ export class BranchService {
       branches = await findClosestBranches(lat, lng, 5);
       isFallback = true;
     }
+
+    branches = branches.map((branch) => {
+      return {
+        ...branch,
+        is_open: isBranchOpen({
+          opens_at: branch.opens_at,
+          closes_at: branch.closes_at,
+          accept_orders: branch.accept_orders,
+          is_active: branch.is_active,
+          country_code: branch.country_code,
+        }),
+      };
+    });
     return { branches, isFallback };
   };
 

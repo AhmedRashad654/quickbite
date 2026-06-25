@@ -6,6 +6,9 @@ export type NearbyBranch = {
   lat: number;
   lng: number;
   is_active: boolean;
+  opens_at: string;
+  closes_at: string;
+  is_open:boolean;
   accept_orders: boolean;
   currency: "EGP" | "SAR";
   name: string;

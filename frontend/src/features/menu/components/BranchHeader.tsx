@@ -7,21 +7,7 @@ type BranchHeaderProps = {
 };
 
 const BranchHeader = ({ branch }: BranchHeaderProps) => {
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const [openHour, openMin] = (branch.opens_at ?? "00:00")
-    .split(":")
-    .map(Number);
-  const [closeHour, closeMin] = (branch.closes_at ?? "00:00")
-    .split(":")
-    .map(Number);
 
-  const openMinutes = openHour * 60 + openMin;
-  const closeMinutes = closeHour * 60 + closeMin;
-  const isOpen =
-    branch.accept_orders &&
-    currentMinutes >= openMinutes &&
-    currentMinutes <= closeMinutes;
 
   return (
     <div className="rounded-lg border bg-card p-5 sm:p-6">
@@ -43,8 +29,8 @@ const BranchHeader = ({ branch }: BranchHeaderProps) => {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-semibold">{branch.restaurant_name}</h1>
-            <Badge variant={isOpen ? "secondary" : "outline"}>
-              {isOpen ? "Open" : "Closed"}
+            <Badge variant={branch?.is_open ? "secondary" : "outline"}>
+              {branch?.is_open ? "Open" : "Closed"}
             </Badge>
           </div>
           <p className="mt-1 text-sm font-medium text-muted-foreground">

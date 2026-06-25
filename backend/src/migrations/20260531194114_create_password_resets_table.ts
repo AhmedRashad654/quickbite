@@ -6,9 +6,9 @@ export async function up(knex: Knex): Promise<void> {
             id SERIAL PRIMARY KEY,
             user_id INTEGER NOT NULL,
             otp_hash TEXT NOT NULL,
-            expires_at TIMESTAMP NOT NULL,
-            consumed_at TIMESTAMP,
-            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            expires_at TIMESTAMPTZ NOT NULL,
+            consumed_at TIMESTAMPTZ,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
             CONSTRAINT fk_password_resets_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );

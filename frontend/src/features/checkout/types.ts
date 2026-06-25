@@ -5,7 +5,7 @@ export interface PlaceOrderItem {
 
 export interface PlaceOrderPayload {
   branch_id: number;
-  order_type: "delivery" | "pickup"; 
+  order_type: "delivery" | "pickup";
   customer_address_id?: number | null;
   payment_method: "cod" | "online";
   items: { product_id: number; quantity: number }[];
@@ -23,7 +23,7 @@ export interface OrderItemResponse {
 export interface OrderResponse {
   public_id: string;
   status: string;
-  payment_method: string;
+  payment_method: "online" | "cod";
   branch: { id: number };
   restaurant: { id: number };
   customer_address: {

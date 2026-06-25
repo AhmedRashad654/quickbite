@@ -1,12 +1,12 @@
 import 'reflect-metadata';
 import http from 'http';
 import { createApp } from './app.js';
-import { env } from './lib/config/env.js';
 import { db } from './lib/knex/knex.js';
 import { TOKENS } from './lib/di/tokens.js';
 import { container } from './lib/di/container.js';
 import { attachWsServer } from './lib/webSocket/ws-server.js';
 import { logger } from './lib/logger/logger.js';
+import { env } from './lib/config/env.js';
 
 const app = createApp();
 const server = http.createServer(app);

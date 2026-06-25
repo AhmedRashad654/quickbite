@@ -11,7 +11,7 @@ export async function up(knex: Knex): Promise<void> {
             name_snapshot       TEXT NOT NULL,
             image_url_snapshot  TEXT NULL,
             line_total          INT NOT NULL,
-            created_at          TIMESTAMP NOT NULL DEFAULT NOW(),
+            created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
             CONSTRAINT fk_order_items_product FOREIGN KEY (product_id) REFERENCES products(id)
         );

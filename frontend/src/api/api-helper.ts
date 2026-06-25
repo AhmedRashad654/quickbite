@@ -4,7 +4,11 @@ export type ApiResponse<T = void> = {
   success: boolean;
   data: T;
   message?: string;
-  meta?: unknown;
+  meta?: {
+    nextCursor: string | null;
+    hasMore: boolean;
+    count: number;
+  };
 };
 
 export class ApiClientError extends Error {

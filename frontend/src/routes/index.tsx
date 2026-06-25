@@ -18,6 +18,10 @@ const Home = lazy(() => import("@/features/home/pages/Home"));
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const MenuPage = lazy(() => import("@/features/menu/pages/MenuPage"));
 const Checkout = lazy(() => import("@/features/checkout/pages/Checkout"));
+const OrdersPage = lazy(() => import("@/features/orders/pages/OrdersPage"));
+const OrderDetailPage = lazy(
+  () => import("@/features/orders/pages/OrderDetailPage"),
+);
 
 const Routes = () => {
   const AuthRoutes = [
@@ -65,6 +69,8 @@ const Routes = () => {
             { path: "/profile", element: <Profile /> },
             { path: "/menu/:branchId", element: <MenuPage /> },
             { path: "/checkout", element: <Checkout /> },
+            { path: "/orders", element: <OrdersPage /> },
+            { path: "/orders/:publicId", element: <OrderDetailPage /> },
           ],
         },
       ],

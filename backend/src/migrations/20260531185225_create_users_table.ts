@@ -11,9 +11,9 @@ export async function up(knex: Knex): Promise<void> {
             name TEXT NOT NULL,
             password_hash TEXT NOT NULL,
             system_role system_role_enum NOT NULL,
-            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            deleted_at TIMESTAMP
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            deleted_at TIMESTAMPTZ
          );
 
          CREATE INDEX idx_users_system_role ON users(system_role);

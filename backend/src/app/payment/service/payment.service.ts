@@ -2,7 +2,6 @@ import { inject, injectable } from 'tsyringe';
 import { TOKENS } from '../../../lib/di/tokens.js';
 import { InitOnlinePaymentResult } from '../types.js';
 import { toMs } from '../../../lib/utils/time.js';
-import { env } from '../../../lib/config/env.js';
 import { Order } from '../../order/types.js';
 import { createSession, findActiveSessionByOrderId } from '../repository/payment-session.repo.js';
 import { fromMinor } from '../../../lib/utils/money.js';
@@ -10,6 +9,7 @@ import { PaymentProviderUnavailableError } from '../errors.js';
 import { PAYMENT_PROVIDER_IDS, PaymentProviderName, PaymentSessionStatus } from '../enums.js';
 import { kashierClient } from '../../../lib/payments/kashier/kashier.client.js';
 import { logger } from '../../../lib/logger/logger.js';
+import { env } from '../../../lib/config/env.js';
 
 @injectable()
 export class PaymentService {
@@ -34,7 +34,7 @@ export class PaymentService {
       providerResp = await this.kashier.createSession({
         merchantOrderId: order.public_id,
         amount: fromMinor(order.total).toFixed(2),
-        currency: order.currency,
+        currency: "EGP",
         description: `QuickBite order ${order.public_id}`,
         allowedMethods: 'card,wallet',
         customerReference: String(order.customer_id),

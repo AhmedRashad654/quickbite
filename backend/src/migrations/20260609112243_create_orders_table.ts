@@ -36,15 +36,15 @@ export async function up(knex: Knex): Promise<void> {
 
             delivery_agent_id     INTEGER,
 
-            created_at            TIMESTAMP NOT NULL DEFAULT NOW(),
-            updated_at            TIMESTAMP NOT NULL DEFAULT NOW(),
-            accepted_at           TIMESTAMP NULL,
-            rejected_at           TIMESTAMP NULL,
-            ready_at              TIMESTAMP NULL,
-            assigned_at           TIMESTAMP NULL,
-            picked_at             TIMESTAMP NULL,
-            delivered_at          TIMESTAMP NULL,
-            cancelled_at          TIMESTAMP NULL,
+            created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            accepted_at           TIMESTAMPTZ NULL,
+            rejected_at           TIMESTAMPTZ NULL,
+            ready_at              TIMESTAMPTZ NULL,
+            assigned_at           TIMESTAMPTZ NULL,
+            picked_at             TIMESTAMPTZ NULL,
+            delivered_at          TIMESTAMPTZ NULL,
+            cancelled_at          TIMESTAMPTZ NULL,
 
             PRIMARY KEY (id, created_at),
             

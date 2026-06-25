@@ -9,9 +9,9 @@ export async function up(knex: Knex): Promise<void> {
             logo_url TEXT,
             status TEXT NOT NULL CHECK(status IN ('active','suspended','disabled','pending')) DEFAULT 'pending',
             primary_country TEXT NOT NULL CHECK(primary_country IN ('EG','SA')),
-            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            status_updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            status_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                                  
             CONSTRAINT fk_restaurants_owner_id FOREIGN KEY (owner_id) REFERENCES users(id)
         );

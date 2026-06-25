@@ -1,4 +1,5 @@
 import { PermissionDeniedError } from '../../../lib/auth/error.js';
+import { isBranchOpen } from '../../../lib/utils/branchTime.js';
 import { BranchNotFoundError } from '../../branch/errors.js';
 import { findBranchByIdWithRestaurant } from '../../branch/repository/branch.repo.js';
 import { RestaurantNotFoundError } from '../../restaurant/errors.js';
@@ -56,9 +57,19 @@ export class ProductService {
   };
 
   findByBranch = async (branchId: number) => {
-    const branch = await findBranchByIdWithRestaurant(branchId);
+    let branch = await findBranchByIdWithRestaurant(branchId);
     if (!branch) throw BranchNotFoundError;
-    
+
+    branch = {
+      ...branch,
+      is_open: isBranchOpen({
+        opens_at: branch.opens_at!,
+        closes_at: branch.closes_at!,
+        accept_orders: branch.accept_orders!,
+        is_active: branch.is_active!,
+        country_code: branch.country_code!,
+      }),
+    };
     const products = await findProductsByBranch(branchId);
     const categoriesMap: Record<number, any> = {};
     products.forEach((row) => {

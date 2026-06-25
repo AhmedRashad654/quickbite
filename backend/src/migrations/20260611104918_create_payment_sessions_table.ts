@@ -15,8 +15,8 @@ export async function up(knex: Knex): Promise<void> {
                             )),
             raw_init_payload  JSONB NOT NULL,
             raw_last_payload  JSONB NULL,
-            created_at      TIMESTAMP NOT NULL DEFAULT NOW(),
-            updated_at      TIMESTAMP NOT NULL DEFAULT NOW(),
+            created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
             CONSTRAINT uq_payment_sessions_provider_session_id UNIQUE (provider_session_id)
         );

@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, ShoppingBag } from "lucide-react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -22,6 +22,8 @@ import CheckoutItemRow from "../components/CheckoutItemRow";
 import OrderSummary from "../components/OrderSummary";
 import { usePlaceOrder } from "../hooks/useCheckout";
 import { checkoutSchema, type CheckoutFormValues } from "../schemas";
+import CartEmpty from "../components/CartEmpty";
+import PaymentRedirect from "../components/PaymentRedirect";
 
 const Checkout = () => {
   const items = useCartStore((s) => s.items);
@@ -31,13 +33,15 @@ const Checkout = () => {
   const deliveryFee = useCartStore((s) => s.delivery_fee);
   const clearCart = useCartStore((s) => s.clearCart);
   const subTotal = useCartStore((s) => s.getSubTotal());
+  const navigate = useNavigate();
 
   const { data: addresses, isLoading: addressesLoading } =
     useCustomerAddresses();
 
   const {
     mutate: placeOrder,
-    isPending: isPlacing
+    isPending: isPlacing,
+    data: result,
   } = usePlaceOrder();
 
   const form = useForm<CheckoutFormValues>({
@@ -53,20 +57,6 @@ const Checkout = () => {
     control: form.control,
     name: "order_type",
   });
-
-  if (items.length === 0) {
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center">
-        <ShoppingBag className="mx-auto h-8 w-8 text-muted-foreground" />
-        <p className="mt-3 text-sm text-muted-foreground">
-          Your cart is empty.
-        </p>
-        <Button className="mt-4" asChild>
-          <Link to="/">Browse restaurants</Link>
-        </Button>
-      </div>
-    );
-  }
 
   const onSubmit = (values: CheckoutFormValues) => {
     if (!branchId) return;
@@ -92,10 +82,23 @@ const Checkout = () => {
           if (data.payment_method === "online" && data.payment?.redirectUrl) {
             window.location.href = data.payment.redirectUrl;
           }
+          if (data.payment_method === "cod") {
+            navigate(`/orders/${data.public_id}`);
+          }
         },
       },
     );
   };
+
+  if (
+    result?.data?.payment_method === "online" &&
+    result?.data?.payment?.redirectUrl
+  )
+    return <PaymentRedirect />;
+
+  if (items.length === 0) {
+    return <CartEmpty />;
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
@@ -106,9 +109,7 @@ const Checkout = () => {
         <ArrowLeft className="h-4 w-4" />
         Back to menu
       </Link>
-
       <h1 className="mb-6 text-2xl font-semibold">Checkout</h1>
-
       <div className="space-y-6">
         <section>
           <h2 className="mb-3 text-lg font-medium">Items from {branchName}</h2>
